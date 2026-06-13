@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ms-waitlist-config
+  namespace: hospital
+data:
+  # URL interna de ms-auth (ClusterIP) para descargar JWKS
+  MS_AUTH_URL: "http://ms-auth-svc:8080"

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: ms-waitlist
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MS_AUTH_URL:http://localhost:8080}/.well-known/jwks.json
+
+server:
+  port: 8083
+
+logging:
+  level:
+    com.hospital.mswaitlist: DEBUG
