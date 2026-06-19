@@ -1,0 +1,33 @@
+# Claves y secretos — NUNCA subir al repositorio
+*.pem
+*.key
+*.p12
+*.pfx
+**/volumes/ms-auth/keys/
+Ms-Auth/k8s/ms-auth-secrets.yaml
+
+# Kubernetes secrets con datos sensibles
+**/k8s/*-secrets.yaml
+
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ / IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Variables de entorno locales
+.env
+.env.local
