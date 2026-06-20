@@ -1,0 +1,172 @@
+# =============================================================================
+# Docker Compose — Sistema Hospitalario
+# Levanta todos los microservicios y sus bases de datos para desarrollo local.
+#
+# Uso:
+#   docker compose up --build        ← primera vez o tras cambios en el código
+#   docker compose up                ← arranque rápido sin reconstruir
+#   docker compose down -v           ← detener y borrar volúmenes (BD limpia)
+# =============================================================================
+
+services:
+
+  # ── Bases de datos ──────────────────────────────────────────────────────────
+
+  postgres-auth:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: msauth_db
+      POSTGRES_USER: msauth_user
+      POSTGRES_PASSWORD: msauth_pass
+    volumes:
+      - pgdata-auth:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U msauth_user -d msauth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-user:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: msuser_db
+      POSTGRES_USER: msuser_user
+      POSTGRES_PASSWORD: msuser_pass
+    volumes:
+      - pgdata-user:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U msuser_user -d msuser_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-appointment:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: msappointment_db
+      POSTGRES_USER: msappointment_user
+      POSTGRES_PASSWORD: msappointment_pass
+    volumes:
+      - pgdata-appointment:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U msappointment_user -d msappointment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-waitlist:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mswaitlist_db
+      POSTGRES_USER: waitlist_user
+      POSTGRES_PASSWORD: waitlist_pass
+    volumes:
+      - pgdata-waitlist:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U waitlist_user -d mswaitlist_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Microservicios ──────────────────────────────────────────────────────────
+
+  ms-auth:
+    build:
+      context: ./Ms-Auth
+    # Sin ports: solo accesible internamente por el BFF (igual que ClusterIP en K8s)
+    environment:
+      DB_URL: jdbc:postgresql://postgres-auth:5432/msauth_db
+      DB_USER: msauth_user
+      DB_PASS: msauth_pass
+      SECURITY_JWT_ISSUER: http://ms-auth:8080
+      SECURITY_JWT_ACCESS_TOKEN_MINUTES: 30
+      SECURITY_JWT_PRIVATE_KEY_PATH: /keys/private_key.pem
+      SECURITY_JWT_PUBLIC_KEY_PATH: /keys/public_key.pem
+    volumes:
+      - ./Ms-Auth/volumes/ms-auth/keys:/keys:ro
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || curl -sf http://localhost:8080/.well-known/jwks.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+  ms-user:
+    build:
+      context: ./Ms-User
+    # Sin ports: solo accesible internamente por el BFF
+    environment:
+      DB_URL: jdbc:postgresql://postgres-user:5432/msuser_db
+      DB_USER: msuser_user
+      DB_PASS: msuser_pass
+      MS_AUTH_URL: http://ms-auth:8080
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      ms-auth:
+        condition: service_healthy
+
+  ms-appointment:
+    build:
+      context: ./Ms-appointment
+    # Sin ports: solo accesible internamente por el BFF
+    environment:
+      DB_URL: jdbc:postgresql://postgres-appointment:5432/msappointment_db
+      DB_USER: msappointment_user
+      DB_PASS: msappointment_pass
+      MS_AUTH_URL: http://ms-auth:8080
+      MS_USER_URL: http://ms-user:8081
+    depends_on:
+      postgres-appointment:
+        condition: service_healthy
+      ms-auth:
+        condition: service_healthy
+      ms-user:
+        condition: service_started
+
+  ms-waitlist:
+    build:
+      context: ./Ms-Waitlist
+    # Sin ports: solo accesible internamente por el BFF
+    environment:
+      DB_URL: jdbc:postgresql://postgres-waitlist:5432/mswaitlist_db
+      DB_USER: waitlist_user
+      DB_PASS: waitlist_pass
+      MS_AUTH_URL: http://ms-auth:8080
+    depends_on:
+      postgres-waitlist:
+        condition: service_healthy
+      ms-auth:
+        condition: service_healthy
+
+  bff:
+    build:
+      context: ./BFF
+    ports:
+      - "3000:8090"
+    environment:
+      MS_AUTH_URL: http://ms-auth:8080
+      MS_USER_URL: http://ms-user:8081
+      MS_APPOINTMENTS_URL: http://ms-appointment:8082
+      MS_WAITLIST_URL: http://ms-waitlist:8083
+      FRONTEND_URL: http://localhost:3001
+    depends_on:
+      ms-auth:
+        condition: service_healthy
+      ms-user:
+        condition: service_started
+      ms-appointment:
+        condition: service_started
+      ms-waitlist:
+        condition: service_started
+
+# ── Volúmenes persistentes ──────────────────────────────────────────────────
+
+volumes:
+  pgdata-auth:
+  pgdata-user:
+  pgdata-appointment:
+  pgdata-waitlist:
