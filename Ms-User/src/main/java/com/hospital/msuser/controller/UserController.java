@@ -4,6 +4,7 @@ import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
 import com.hospital.msuser.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,23 +24,27 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "Registrar usuario", description = "Crea un nuevo usuario y sus credenciales en ms-auth")
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody CreateUserRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(dto));
     }
 
+    @Operation(summary = "Listar usuarios", description = "Devuelve todos los usuarios activos del sistema")
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<UserResponseDTO>> getAll() {
         return ResponseEntity.ok(userService.getAllActiveUsers());
     }
 
+    @Operation(summary = "Obtener usuario", description = "Devuelve el perfil de un usuario por su ID")
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponseDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @Operation(summary = "Actualizar usuario", description = "Modifica los datos de un usuario existente")
     @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponseDTO> update(
@@ -48,6 +53,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
+    @Operation(summary = "Desactivar usuario", description = "Realiza un soft-delete desactivando la cuenta del usuario")
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
