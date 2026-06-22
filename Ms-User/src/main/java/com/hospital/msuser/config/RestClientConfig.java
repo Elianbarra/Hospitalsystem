@@ -8,10 +8,14 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class RestClientConfig {
 
+    /**
+     * RestClient para llamar a ms-auth (registro de credenciales).
+     * Solo se usa en el flujo de registro — no lleva token Bearer.
+     */
     @Bean("authRestClient")
-    public RestClient authRestClient(@Value("${ms-auth.base-url}") String baseUrl) {
+    public RestClient authRestClient(@Value("${ms-auth.base-url}") String authBaseUrl) {
         return RestClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(authBaseUrl)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

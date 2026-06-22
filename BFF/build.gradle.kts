@@ -11,7 +11,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
-    compilerArgs.add("-parameters") // Preserva nombres de parámetros para records + Jackson
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
 }
 
 repositories {
@@ -22,9 +25,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // Seguridad — valida JWT vía JWKS antes de rutear a los ms-*
+    // Seguridad — valida JWT del cliente vía JWKS antes de reenviar a ms-*
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
+    // Swagger / OpenAPI
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

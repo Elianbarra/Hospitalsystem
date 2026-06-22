@@ -1,9 +1,9 @@
 package com.hospital.msuser.controller;
 
-import com.hospital.msuser.client.UserClient;
 import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
+import com.hospital.msuser.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -18,37 +18,40 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "Users", description = "Gestión de usuarios del sistema hospitalario")
-@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Users", description = "Gestión de usuarios (pacientes y doctores)")
 public class UserController {
 
-    private final UserClient userClient;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody CreateUserRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userClient.registerUser(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(dto));
     }
 
     @GetMapping
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<UserResponseDTO>> getAll() {
-        return ResponseEntity.ok(userClient.getAllActiveUsers());
+        return ResponseEntity.ok(userService.getAllActiveUsers());
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponseDTO> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(userClient.getUserById(id));
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponseDTO> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequestDTO dto) {
-        return ResponseEntity.ok(userClient.updateUser(id, dto));
+        return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
-        userClient.deactivateUser(id);
+        userService.deactivateUser(id);
         return ResponseEntity.noContent().build();
     }
 }

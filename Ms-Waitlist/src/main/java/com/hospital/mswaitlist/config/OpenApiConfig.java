@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "MS-Waitlist API",
                 version = "1.0.0",
-                description = "Microservicio de lista de espera. Gestiona la cola de pacientes usando estrategias de prioridad (STANDARD / PRIORITY). Almacenamiento en memoria — sin persistencia en base de datos.",
+                description = "Microservicio de lista de espera. Gestiona pacientes en espera por especialidad y prioridad.",
                 contact = @Contact(name = "Hospital System", email = "admin@hospital.cl")
         ),
         servers = @Server(url = "/", description = "Servidor actual")
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT",
-        description = "Ingresa el token JWT obtenido de POST /api/auth/login en MS-Auth"
+        description = "Token JWT obtenido de POST /api/auth/login en MS-Auth"
 )
 public class OpenApiConfig {
 }

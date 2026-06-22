@@ -11,6 +11,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * El BFF es el único punto de entrada externo. Valida el JWT aquí antes de
+ * reenviar la petición a cualquier ms-*. Los ms-* también validan el mismo
+ * token de forma independiente (defensa en profundidad).
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -21,10 +26,11 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos — no requieren JWT
+                // Login y registro son públicos — el usuario aún no tiene token
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
-                // Todo lo demás requiere token válido
+                // Swagger UI
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -33,10 +39,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Mapea el claim "role" del JWT al prefijo ROLE_ de Spring Security.
-     * Permite usar @PreAuthorize("hasRole('DOCTOR')") en controllers si se necesita.
-     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();

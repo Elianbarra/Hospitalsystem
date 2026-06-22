@@ -4,6 +4,8 @@ import cl.rednorte.bff.model.request.LoginRequest;
 import cl.rednorte.bff.model.response.AuthResponse;
 import cl.rednorte.bff.model.response.TokenValidationResponse;
 import cl.rednorte.bff.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @Validated
+@Tag(name = "Autenticación", description = "Inicio de sesión y validación de tokens JWT")
 public class AuthController {
 
     private final AuthService authService;
@@ -28,11 +31,13 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @Operation(summary = "Iniciar sesión", description = "Autentica al usuario y devuelve un token JWT")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    @Operation(summary = "Validar token", description = "Verifica si un token JWT es válido y no ha expirado")
     @GetMapping("/validate")
     public ResponseEntity<TokenValidationResponse> validate(
             @RequestParam @NotBlank String token) {

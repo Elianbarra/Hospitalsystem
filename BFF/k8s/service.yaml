@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-service
+  namespace: hospital
+  labels:
+    app: bff
+spec:
+  selector:
+    app: bff
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 8090
+  # LoadBalancer → expone el BFF en localhost:3000 en Docker Desktop
+  # En producción cambiar a ClusterIP + Ingress
+  type: LoadBalancer

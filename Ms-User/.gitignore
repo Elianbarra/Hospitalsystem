@@ -1,81 +1,23 @@
-# =============================================================================
-# .gitignore — Spring Boot + Gradle + K8s
-# =============================================================================
-
-# ── Gradle ────────────────────────────────────────────────────────────────────
+HELP.md
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-# Rutas locales de Java (específicas de cada máquina — no compartir)
-gradle.properties
-
-# ── Java ──────────────────────────────────────────────────────────────────────
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-hs_err_pid*
-replay_pid*
-
-# ── Spring Boot ───────────────────────────────────────────────────────────────
-HELP.md
-target/
-spring-shell.log
-
-# ── Logs ──────────────────────────────────────────────────────────────────────
-*.log
-*.log.*
-logs/
-
-# ── Secretos y variables de entorno ───────────────────────────────────────────
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-*.p12
-*.jks
-*.pkcs12
-*.keystore
-*.truststore
-
-# ── Kubernetes — no subir secrets con valores reales ──────────────────────────
-k8s/*.local.yaml
-k8s/*.secret.yaml
-
-# ── IntelliJ IDEA ─────────────────────────────────────────────────────────────
+### IntelliJ IDEA ###
 .idea/
 *.iws
 *.iml
 *.ipr
 out/
 
-# ── VS Code ───────────────────────────────────────────────────────────────────
+### VS Code ###
 .vscode/
 
-# ── Eclipse ───────────────────────────────────────────────────────────────────
-.classpath
-.project
-.settings/
-bin/
+### Env ###
+.env
+*.env
 
-# ── macOS ─────────────────────────────────────────────────────────────────────
+### OS ###
 .DS_Store
-**/.DS_Store
-.AppleDouble
-.LSOverride
-
-# ── Windows ───────────────────────────────────────────────────────────────────
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# ── Reportes de test y cobertura ──────────────────────────────────────────────
-.jacoco/
-jacoco.exec
-.sonar/
-test-results/

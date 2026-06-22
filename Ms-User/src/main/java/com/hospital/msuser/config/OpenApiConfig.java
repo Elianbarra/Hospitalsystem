@@ -10,13 +10,14 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Acceso local: http://localhost:8081/swagger-ui.html
+ * En K8s: kubectl port-forward svc/ms-user-svc 8081:8081 -n hospital
  */
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
                 title = "MS-User API",
                 version = "1.0.0",
-                description = "Microservicio de gestión de usuarios (pacientes, médicos, administrativos). Requiere JWT emitido por MS-Auth en todos los endpoints excepto registro.",
+                description = "Microservicio de gestión de usuarios. Registro, consulta y actualización de pacientes y doctores.",
                 contact = @Contact(name = "Hospital System", email = "admin@hospital.cl")
         ),
         servers = @Server(url = "/", description = "Servidor actual")
@@ -26,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT",
-        description = "Ingresa el token JWT obtenido de POST /api/auth/login en MS-Auth"
+        description = "Token JWT obtenido de POST /api/auth/login en MS-Auth"
 )
 public class OpenApiConfig {
 }

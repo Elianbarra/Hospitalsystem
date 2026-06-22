@@ -1,12 +1,12 @@
 package com.hospital.msuser.exception;
 
-import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +36,8 @@ public class GlobalExceptionHandler {
                 .body(Map.of("errors", fieldErrors));
     }
 
-    @ExceptionHandler(FeignException.class)
-    public ResponseEntity<Map<String, String>> handleFeign(FeignException ex) {
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ResponseEntity<Map<String, String>> handleRestClient(HttpClientErrorException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(Map.of("error", "Error al comunicarse con MS-AUTH: " + ex.getMessage()));
     }

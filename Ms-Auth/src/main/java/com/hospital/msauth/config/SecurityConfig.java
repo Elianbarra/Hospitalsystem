@@ -22,14 +22,10 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        // JWKS público — los ms-* lo consumen para descargar la public key
+                        // Clave pública JWKS — deben poder accederla los demás microservicios
                         .requestMatchers("/.well-known/jwks.json").permitAll()
-                        // Swagger UI + OpenAPI spec
-                        .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
+                        // Swagger UI (acceso local vía port-forward en K8s)
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();

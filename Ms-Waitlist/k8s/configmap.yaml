@@ -4,5 +4,6 @@ metadata:
   name: ms-waitlist-config
   namespace: hospital
 data:
-  # URL interna de ms-auth (ClusterIP) para descargar JWKS
+  DB_URL: "jdbc:postgresql://ms-waitlist-postgres-svc:5432/mswaitlist_db"
+  DB_USER: "waitlist_user"
   MS_AUTH_URL: "http://ms-auth-svc:8080"

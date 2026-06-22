@@ -1,18 +1,25 @@
 package com.hospital.mswaitlist.repository;
 
-import com.hospital.mswaitlist.domain.WaitlistEntry;
+import com.hospital.mswaitlist.entity.WaitlistEntry;
+import com.hospital.mswaitlist.entity.enums.Specialty;
+import com.hospital.mswaitlist.entity.enums.WaitlistStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface WaitlistRepository {
+@Repository
+public interface WaitlistRepository extends JpaRepository<WaitlistEntry, UUID> {
 
-    WaitlistEntry save(WaitlistEntry entry);
+    List<WaitlistEntry> findByActiveTrueOrderByPriorityDescCreatedAtAsc();
 
-    List<WaitlistEntry> findAll();
+    List<WaitlistEntry> findByPatientIdAndActiveTrueOrderByCreatedAtAsc(UUID patientId);
 
-    Optional<WaitlistEntry> findById(UUID id);
+    List<WaitlistEntry> findBySpecialtyAndActiveTrueOrderByPriorityDescCreatedAtAsc(Specialty specialty);
 
-    Optional<WaitlistEntry> findByEmail(String email);
+    List<WaitlistEntry> findByStatusAndActiveTrueOrderByPriorityDescCreatedAtAsc(WaitlistStatus status);
+
+    Optional<WaitlistEntry> findByIdAndActiveTrue(UUID id);
 }

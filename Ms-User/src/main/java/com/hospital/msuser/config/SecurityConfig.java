@@ -21,15 +21,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Registro de nuevos usuarios: no requiere JWT (el usuario aún no tiene uno)
+                // Registro público — el usuario no tiene token todavía
                 .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
-                // Swagger UI + OpenAPI spec
-                .requestMatchers(
-                        "/swagger-ui.html",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                ).permitAll()
-                // Todo lo demás requiere token válido (Bearer propagado por el BFF)
+                // Swagger UI (acceso local vía port-forward en K8s)
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
