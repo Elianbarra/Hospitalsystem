@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ms-waitlist-config
+  namespace: hospital
+data:
+  DB_URL: "jdbc:postgresql://ms-waitlist-postgres-svc:5432/mswaitlist_db"
+  DB_USER: "waitlist_user"
+  MS_AUTH_URL: "http://ms-auth-svc:8080"

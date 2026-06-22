@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-user-postgres-svc
+  namespace: hospital
+  labels:
+    app: ms-user-postgres
+    tier: database
+spec:
+  selector:
+    app: ms-user-postgres
+  ports:
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP

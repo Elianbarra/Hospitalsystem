@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bff-config
+  namespace: hospital
+  labels:
+    app: bff
+data:
+  SERVER_PORT: "8090"
+  MS_AUTH_URL: "http://ms-auth-service:8080"
+  MS_USER_URL: "http://ms-user-service:8081"
+  MS_APPOINTMENTS_URL: "http://ms-appointment-service:8082"
+  MS_WAITLIST_URL: "http://ms-waitlist-svc:8083"
+  FRONTEND_URL: "http://localhost:3001"

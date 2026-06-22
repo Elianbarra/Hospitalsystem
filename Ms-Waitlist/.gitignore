@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+gradle.properties
+
+# Java
+*.class
+*.jar
+*.war
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+k8s/*.local.yaml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.DS_Store
+
+# Logs
+*.log
+logs/

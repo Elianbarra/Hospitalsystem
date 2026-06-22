@@ -1,0 +1,49 @@
+# ── Gradle ────────────────────────────────────────────────────────────────────
+.gradle/
+build/
+out/
+
+# El wrapper JAR SÍ debe subirse (permite usar ./gradlew sin tener Gradle instalado)
+!gradle/wrapper/gradle-wrapper.jar
+
+# ── Compiled / binaries ───────────────────────────────────────────────────────
+*.class
+*.jar
+*.war
+*.ear
+# Excepción: el wrapper JAR
+!gradle/wrapper/gradle-wrapper.jar
+
+# ── Spring Boot ───────────────────────────────────────────────────────────────
+HELP.md
+*.log
+logs/
+# Overrides locales — nunca subir al repo
+application-local.properties
+application-local.yml
+application-local.yaml
+# Si usas application-secret.properties para credenciales locales:
+application-secret.properties
+application-secret.yml
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+
+# ── Variables de entorno ──────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# ── Frontend (repo independiente — NO trackear aquí) ─────────────────────────
+frontend/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store

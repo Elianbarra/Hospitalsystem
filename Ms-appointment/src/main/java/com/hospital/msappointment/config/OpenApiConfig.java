@@ -1,0 +1,33 @@
+package com.hospital.msappointment.config;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Acceso local: http://localhost:8082/swagger-ui.html
+ * En K8s (ClusterIP): kubectl port-forward svc/ms-appointment-svc 8082:8082 -n hospital
+ */
+@Configuration
+@OpenAPIDefinition(
+        info = @Info(
+                title = "MS-Appointment API",
+                version = "1.0.0",
+                description = "Microservicio de gestión de citas médicas. Permite crear, consultar, actualizar y cancelar citas. Todos los endpoints requieren JWT válido.",
+                contact = @Contact(name = "Hospital System", email = "admin@hospital.cl")
+        ),
+        servers = @Server(url = "/", description = "Servidor actual")
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        description = "Ingresa el token JWT obtenido de POST /api/auth/login en MS-Auth"
+)
+public class OpenApiConfig {
+}
