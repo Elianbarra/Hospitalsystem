@@ -4,9 +4,9 @@ public record WaitlistEntryResponse(
         String id,
         String patientId,
         String specialty,
-        String priority,      // HIGH | MEDIUM | LOW
-        String status,        // WAITING | CALLED | ASSIGNED | CANCELLED
-        String reason,
-        String requestDate,
-        String estimatedDate
+        String priority,   // NORMAL | URGENTE | CRITICO
+        String status,     // WAITING | NOTIFIED | ASSIGNED | CANCELLED
+        String notes,
+        String createdAt,
+        String updatedAt
 ) {}

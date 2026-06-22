@@ -4,11 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * Inscripción de un paciente en la lista de espera para una especialidad.
- * La prioridad es asignada por el ms-waitlist según criterios clínicos.
+ * La prioridad la asigna el médico/admin mediante PUT /{id}; en creación
+ * ms-waitlist asigna NORMAL por defecto.
  */
 public record CreateWaitlistEntryRequest(
         @NotBlank String patientId,
         @NotBlank String specialty,
-        String reason,
-        String priority   // HIGH | MEDIUM | LOW — si es null, el ms-waitlist asigna automáticamente
+        String notes
 ) {}

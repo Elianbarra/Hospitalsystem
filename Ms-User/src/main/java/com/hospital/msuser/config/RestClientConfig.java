@@ -12,7 +12,7 @@ public class RestClientConfig {
      * RestClient para llamar a ms-auth (registro de credenciales).
      * Solo se usa en el flujo de registro — no lleva token Bearer.
      */
-    @Bean("authRestClient")
+    @Bean("msAuthRestClient")
     public RestClient authRestClient(@Value("${ms-auth.base-url}") String authBaseUrl) {
         return RestClient.builder()
                 .baseUrl(authBaseUrl)

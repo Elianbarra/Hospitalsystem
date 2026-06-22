@@ -2,6 +2,7 @@ package cl.rednorte.bff.service;
 
 import cl.rednorte.bff.exception.ApiException;
 import cl.rednorte.bff.model.request.CreateWaitlistEntryRequest;
+import cl.rednorte.bff.model.request.UpdateWaitlistEntryRequest;
 import cl.rednorte.bff.model.response.WaitlistEntryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +96,39 @@ public class WaitlistService {
             throw new ApiException(e.getStatusCode().value(), "ms-waitlist error");
         } catch (ResourceAccessException e) {
             throw new ApiException(503, "ms-waitlist unavailable — pendiente de implementación");
+        }
+    }
+
+    public WaitlistEntryResponse cancel(String id) {
+        log.debug("BFF → ms-waitlist  PUT /api/waitlist/{}/cancel", id);
+        try {
+            return waitlistClient.put()
+                    .uri("/api/waitlist/{id}/cancel", id)
+                    .retrieve()
+                    .body(WaitlistEntryResponse.class);
+        } catch (HttpClientErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), "ms-waitlist error");
+        } catch (ResourceAccessException e) {
+            throw new ApiException(503, "ms-waitlist unavailable");
+        }
+    }
+
+    public WaitlistEntryResponse update(String id, UpdateWaitlistEntryRequest request) {
+        log.debug("BFF → ms-waitlist  PUT /api/waitlist/{}  priority={}", id, request.priority());
+        try {
+            return waitlistClient.put()
+                    .uri("/api/waitlist/{id}", id)
+                    .body(request)
+                    .retrieve()
+                    .body(WaitlistEntryResponse.class);
+        } catch (HttpClientErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), "ms-waitlist error");
+        } catch (ResourceAccessException e) {
+            throw new ApiException(503, "ms-waitlist unavailable");
         }
     }
 

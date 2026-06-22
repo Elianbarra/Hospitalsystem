@@ -1,6 +1,7 @@
 package cl.rednorte.bff.controller;
 
 import cl.rednorte.bff.model.request.CreateWaitlistEntryRequest;
+import cl.rednorte.bff.model.request.UpdateWaitlistEntryRequest;
 import cl.rednorte.bff.model.response.WaitlistEntryResponse;
 import cl.rednorte.bff.service.WaitlistService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,14 +17,13 @@ import java.util.List;
  * Controller MVC — capa Waitlist (Lista de espera).
  *
  * Rutas expuestas por el BFF:
- *   GET    /api/waitlist                      → ms-waitlist GET  /api/waitlist
- *   POST   /api/waitlist                      → ms-waitlist POST /api/waitlist
- *   GET    /api/waitlist/{id}                 → ms-waitlist GET  /api/waitlist/{id}
+ *   GET    /api/waitlist                      → ms-waitlist GET    /api/waitlist
+ *   POST   /api/waitlist                      → ms-waitlist POST   /api/waitlist
+ *   GET    /api/waitlist/{id}                 → ms-waitlist GET    /api/waitlist/{id}
+ *   PUT    /api/waitlist/{id}                 → ms-waitlist PUT    /api/waitlist/{id}
+ *   PUT    /api/waitlist/{id}/cancel          → ms-waitlist PUT    /api/waitlist/{id}/cancel
  *   DELETE /api/waitlist/{id}                 → ms-waitlist DELETE /api/waitlist/{id}
- *   GET    /api/waitlist/patient/{patientId}  → ms-waitlist GET  /api/waitlist/patient/{id}
- *
- * NOTA: ms-waitlist aún no está implementado.
- *       Estas rutas retornarán 503 hasta que el microservicio esté disponible.
+ *   GET    /api/waitlist/patient/{patientId}  → ms-waitlist GET    /api/waitlist/patient/{patientId}
  */
 @RestController
 @RequestMapping("/api/waitlist")
@@ -42,7 +42,7 @@ public class WaitlistController {
         return ResponseEntity.ok(waitlistService.getAll());
     }
 
-    @Operation(summary = "Agregar a lista de espera", description = "Ingresa un paciente a la lista de espera")
+    @Operation(summary = "Agregar a lista de espera", description = "Ingresa un paciente a la lista de espera. Prioridad inicial: NORMAL")
     @PostMapping
     public ResponseEntity<WaitlistEntryResponse> enqueue(@Valid @RequestBody CreateWaitlistEntryRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(waitlistService.enqueue(request));
@@ -54,7 +54,21 @@ public class WaitlistController {
         return ResponseEntity.ok(waitlistService.getById(id));
     }
 
-    @Operation(summary = "Eliminar de lista de espera", description = "Retira a un paciente de la lista de espera por su ID")
+    @Operation(summary = "Actualizar entrada", description = "Médico/Admin actualiza prioridad (NORMAL|URGENTE|CRITICO) o estado")
+    @PutMapping("/{id}")
+    public ResponseEntity<WaitlistEntryResponse> update(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateWaitlistEntryRequest request) {
+        return ResponseEntity.ok(waitlistService.update(id, request));
+    }
+
+    @Operation(summary = "Cancelar entrada", description = "Marca como CANCELLED la entrada de un paciente en lista de espera")
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<WaitlistEntryResponse> cancel(@PathVariable String id) {
+        return ResponseEntity.ok(waitlistService.cancel(id));
+    }
+
+    @Operation(summary = "Eliminar de lista de espera", description = "Elimina permanentemente una entrada de la lista de espera")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remove(@PathVariable String id) {
         waitlistService.remove(id);
