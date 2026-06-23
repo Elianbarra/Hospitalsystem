@@ -8,6 +8,7 @@ Ms-Auth/k8s/ms-auth-secrets.yaml
 
 # Kubernetes secrets con datos sensibles
 **/k8s/*-secrets.yaml
+**/k8s/secret.yaml
 
 # Gradle
 .gradle/

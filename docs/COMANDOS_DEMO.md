@@ -16,7 +16,7 @@ kubectl get pods -n hospital
 
 Port-forward del BFF (dejarlo corriendo en terminal separada):
 ```bash
-kubectl port-forward svc/bff -n hospital 8090:8090
+kubectl port-forward svc/bff-service -n hospital 8090:8090
 ```
 
 ---
@@ -80,7 +80,7 @@ Nombres: `ms-auth` · `ms-user` · `ms-appointment` · `ms-waitlist` · `bff`
 ## 6. LIMPIAR CITAS (para demo limpia)
 
 ```bash
-psql "postgresql://neondb_owner:npg_mSvx5zk9NTHq@ep-patient-silence-ad1s4w9m-pooler.c-2.us-east-1.aws.neon.tech/msappointment_db?sslmode=require" \
+psql "postgresql://neondb_owner:NuevaClave2025!@ep-patient-silence-ad1s4w9m-pooler.c-2.us-east-1.aws.neon.tech/msappointment_db?sslmode=require" \
   -c "TRUNCATE TABLE appointments RESTART IDENTITY;"
 ```
 
