@@ -220,7 +220,7 @@ Swagger UI disponible en `http://localhost:<puerto>/swagger-ui.html`
 |---|---|
 | Aaron Lorca | ms-appointment, BFF |
 | Elian Barra | ms-auth, ms-user |
-| (compañero) | ms-waitlist |
+| Cesar Estay | ms-waitlist |
 
 ---
 
