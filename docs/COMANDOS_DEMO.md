@@ -77,7 +77,28 @@ Nombres: `ms-auth` · `ms-user` · `ms-appointment` · `ms-waitlist` · `bff`
 
 ---
 
-## 6. LIMPIAR CITAS (para demo limpia)
+## 6. SWAGGER UI (documentación de APIs)
+
+Abrir un port-forward por servicio en terminales separadas y acceder a la URL:
+
+```bash
+kubectl port-forward svc/ms-auth-service        -n hospital 8080:8080
+kubectl port-forward svc/ms-user-service        -n hospital 8081:8081
+kubectl port-forward svc/ms-appointment-service -n hospital 8082:8082
+kubectl port-forward svc/ms-waitlist-svc        -n hospital 8083:8083
+```
+
+| Servicio | URL Swagger |
+|---|---|
+| ms-auth | http://localhost:8080/swagger-ui.html |
+| ms-user | http://localhost:8081/swagger-ui.html |
+| ms-appointment | http://localhost:8082/swagger-ui.html |
+| ms-waitlist | http://localhost:8083/swagger-ui.html |
+| BFF (sin port-forward) | http://localhost:8090/swagger-ui.html |
+
+---
+
+## 7. LIMPIAR CITAS (para demo limpia)
 
 ```bash
 psql "postgresql://neondb_owner:NuevaClave2025!@ep-patient-silence-ad1s4w9m-pooler.c-2.us-east-1.aws.neon.tech/msappointment_db?sslmode=require" \
@@ -86,7 +107,7 @@ psql "postgresql://neondb_owner:NuevaClave2025!@ep-patient-silence-ad1s4w9m-pool
 
 ---
 
-## 7. CREDENCIALES DEMO
+## 8. CREDENCIALES DEMO
 
 | Rol | Email | Contraseña |
 |-----|-------|-----------|
@@ -99,7 +120,7 @@ psql "postgresql://neondb_owner:NuevaClave2025!@ep-patient-silence-ad1s4w9m-pool
 
 ---
 
-## 8. PENDIENTES ANTES DE LA DEMO
+## 9. PENDIENTES ANTES DE LA DEMO
 
 - [ ] Correr `./deploy.sh` completo para aplicar cambios de ms-appointment y BFF
 - [ ] Insertar admin en NeonDB (ver instrucciones en CREDENCIALES o correr V3 migrations)
