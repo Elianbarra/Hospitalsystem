@@ -63,10 +63,28 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.updateAppointment(id, dto));
     }
 
-    @Operation(summary = "Cancelar cita", description = "Marca una cita como cancelada sin eliminarla")
+    @Operation(summary = "Cancelar cita (genérico)", description = "Marca una cita como cancelada sin especificar quién cancela")
     @PutMapping("/{id}/cancel")
     public ResponseEntity<AppointmentResponseDTO> cancel(@PathVariable UUID id) {
         return ResponseEntity.ok(appointmentService.cancelAppointment(id));
+    }
+
+    @Operation(
+        summary = "Cancelar cita — médico",
+        description = "El médico cancela la cita. El BFF orquestará la reasignación automática al siguiente en lista de espera."
+    )
+    @PutMapping("/{id}/cancel-doctor")
+    public ResponseEntity<AppointmentResponseDTO> cancelByDoctor(@PathVariable UUID id) {
+        return ResponseEntity.ok(appointmentService.cancelByDoctor(id));
+    }
+
+    @Operation(
+        summary = "Cancelar cita — paciente",
+        description = "El paciente cancela su cita. El BFF orquestará el reencola al final de la lista de espera (requeueToEnd)."
+    )
+    @PutMapping("/{id}/cancel-patient")
+    public ResponseEntity<AppointmentResponseDTO> cancelByPatient(@PathVariable UUID id) {
+        return ResponseEntity.ok(appointmentService.cancelByPatient(id));
     }
 
     @Operation(summary = "Eliminar cita", description = "Elimina permanentemente una cita médica por su ID")

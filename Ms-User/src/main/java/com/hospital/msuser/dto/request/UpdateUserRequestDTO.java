@@ -1,6 +1,7 @@
 package com.hospital.msuser.dto.request;
 
 import com.hospital.msuser.entity.enums.DocumentType;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.entity.enums.UserRole;
 import lombok.*;
 
@@ -16,4 +17,7 @@ public class UpdateUserRequestDTO {
     private DocumentType documentType;
     private String documentNumber;
     private UserRole role;
+
+    /** Especialidad médica — actualizable solo para médicos */
+    private MedicalSpecialty specialty;
 }

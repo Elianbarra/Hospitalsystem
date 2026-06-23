@@ -6,6 +6,7 @@ import com.hospital.mswaitlist.dto.response.WaitlistEntryResponseDTO;
 import com.hospital.mswaitlist.entity.enums.Specialty;
 import com.hospital.mswaitlist.entity.enums.WaitlistStatus;
 import com.hospital.mswaitlist.service.WaitlistService;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -75,6 +76,20 @@ public class WaitlistController {
     @PutMapping("/{id}/cancel")
     public ResponseEntity<WaitlistEntryResponseDTO> cancel(@PathVariable UUID id) {
         return ResponseEntity.ok(waitlistService.cancel(id));
+    }
+
+    @Operation(summary = "Siguiente en cola", description = "Devuelve el siguiente paciente en cola para una especialidad (vitalRisk → priority → requeuedAt)")
+    @GetMapping("/specialty/{specialty}/next")
+    public ResponseEntity<WaitlistEntryResponseDTO> getNextForSpecialty(@PathVariable Specialty specialty) {
+        return waitlistService.getNextForSpecialty(specialty)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+    }
+
+    @Operation(summary = "Reencolar al final", description = "Mueve al paciente al final de la cola cuando cancela su cita")
+    @PutMapping("/{id}/requeue")
+    public ResponseEntity<WaitlistEntryResponseDTO> requeueToEnd(@PathVariable UUID id) {
+        return ResponseEntity.ok(waitlistService.requeueToEnd(id));
     }
 
     @Operation(summary = "Eliminar entrada", description = "Elimina permanentemente una entrada de la lista de espera")

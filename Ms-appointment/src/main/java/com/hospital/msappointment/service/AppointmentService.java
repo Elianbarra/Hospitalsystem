@@ -1,15 +1,17 @@
 package com.hospital.msappointment.service;
 
-import com.hospital.msappointment.client.user.UserRestClient;
 import com.hospital.msappointment.dto.request.CreateAppointmentRequestDTO;
 import com.hospital.msappointment.dto.request.UpdateAppointmentRequestDTO;
 import com.hospital.msappointment.dto.response.AppointmentResponseDTO;
 import com.hospital.msappointment.entity.Appointment;
 import com.hospital.msappointment.entity.enums.AppointmentStatus;
+import com.hospital.msappointment.entity.enums.AppointmentType;
+import com.hospital.msappointment.entity.enums.CancelledBy;
 import com.hospital.msappointment.exception.AppointmentConflictException;
 import com.hospital.msappointment.exception.AppointmentNotFoundException;
 import com.hospital.msappointment.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,18 +24,15 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
-    private final UserRestClient userRestClient;
 
     // ─── Create ──────────────────────────────────────────────────────────────
 
     public AppointmentResponseDTO createAppointment(CreateAppointmentRequestDTO dto) {
-        // Valida que el paciente y el doctor existan en MS-USER
-        userRestClient.getUserById(dto.getPatientId());
-        userRestClient.getUserById(dto.getDoctorId());
-
+        // La validación de existencia de paciente y doctor la hace el BFF antes de llamar aquí.
         // Verifica que no haya solapamiento de horario para el doctor
         LocalDateTime end = dto.getScheduledAt().plusMinutes(dto.getDurationMinutes());
         boolean overlap = appointmentRepository
@@ -47,12 +46,16 @@ public class AppointmentService {
             throw new AppointmentConflictException("El doctor ya tiene una cita en ese horario");
         }
 
+        AppointmentType apptType = dto.getAppointmentType() != null
+                ? dto.getAppointmentType() : AppointmentType.CONSULTA;
+
         Appointment appointment = Appointment.builder()
                 .patientId(dto.getPatientId())
                 .doctorId(dto.getDoctorId())
                 .scheduledAt(dto.getScheduledAt())
                 .durationMinutes(dto.getDurationMinutes())
                 .specialty(dto.getSpecialty())
+                .appointmentType(apptType)
                 .notes(dto.getNotes())
                 .build();
 
@@ -111,6 +114,35 @@ public class AppointmentService {
         return toResponse(appointmentRepository.save(appointment));
     }
 
+    /**
+     * Cancela la cita por decisión del MÉDICO.
+     * El BFF es responsable de orquestar la reasignación automática al siguiente
+     * en la lista de espera (esta capa solo registra la cancelación).
+     */
+    public AppointmentResponseDTO cancelByDoctor(UUID id) {
+        Appointment appointment = appointmentRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new AppointmentNotFoundException(id));
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.setCancelledBy(CancelledBy.DOCTOR);
+        log.info("Cita {} cancelada por DOCTOR — BFF orquestará reasignación a especialidad {}",
+                id, appointment.getSpecialty());
+        return toResponse(appointmentRepository.save(appointment));
+    }
+
+    /**
+     * Cancela la cita por decisión del PACIENTE.
+     * El BFF es responsable de llamar a ms-waitlist para mover al paciente al
+     * final de la cola (requeueToEnd). Esta capa solo registra la cancelación.
+     */
+    public AppointmentResponseDTO cancelByPatient(UUID id) {
+        Appointment appointment = appointmentRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new AppointmentNotFoundException(id));
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.setCancelledBy(CancelledBy.PATIENT);
+        log.info("Cita {} cancelada por PACIENTE — BFF orquestará reencola en lista de espera", id);
+        return toResponse(appointmentRepository.save(appointment));
+    }
+
     public void deleteAppointment(UUID id) {
         Appointment appointment = appointmentRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new AppointmentNotFoundException(id));
@@ -128,7 +160,9 @@ public class AppointmentService {
                 .scheduledAt(a.getScheduledAt())
                 .durationMinutes(a.getDurationMinutes())
                 .specialty(a.getSpecialty())
+                .appointmentType(a.getAppointmentType())
                 .status(a.getStatus())
+                .cancelledBy(a.getCancelledBy())
                 .notes(a.getNotes())
                 .createdAt(a.getCreatedAt())
                 .updatedAt(a.getUpdatedAt())

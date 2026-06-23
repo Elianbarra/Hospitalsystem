@@ -12,5 +12,6 @@ public record CreateUserRequest(
         @NotBlank String phone,
         @NotBlank String documentType,
         @NotBlank String documentNumber,
-        @NotBlank String role
+        @NotBlank String role,
+        String specialty   // obligatorio cuando role = DOCTOR
 ) {}

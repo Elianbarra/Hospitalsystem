@@ -8,6 +8,18 @@ import { inputClass } from "@/lib/styles";
 import { getSession } from "@/lib/session";
 import { BFF_URL } from "@/lib/bff";
 
+const MEDICAL_SPECIALTIES = [
+  "GENERAL", "CARDIOLOGY", "NEUROLOGY", "PEDIATRICS", "ORTHOPEDICS",
+  "DERMATOLOGY", "GYNECOLOGY", "OPHTHALMOLOGY", "PSYCHIATRY",
+  "TRAUMATOLOGY", "INTERNAL_MEDICINE", "EMERGENCY",
+];
+const SPECIALTY_LABELS: Record<string, string> = {
+  GENERAL: "Medicina General", CARDIOLOGY: "Cardiología", NEUROLOGY: "Neurología",
+  PEDIATRICS: "Pediatría", ORTHOPEDICS: "Ortopedia", DERMATOLOGY: "Dermatología",
+  GYNECOLOGY: "Ginecología", OPHTHALMOLOGY: "Oftalmología", PSYCHIATRY: "Psiquiatría",
+  TRAUMATOLOGY: "Traumatología", INTERNAL_MEDICINE: "Medicina Interna", EMERGENCY: "Urgencias",
+};
+
 export default function StaffRegisterPage() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
@@ -16,7 +28,8 @@ export default function StaffRegisterPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", password: "",
-    phone: "", documentType: "DNI", documentNumber: "", role: "DOCTOR",
+    phone: "", documentType: "DNI", documentNumber: "",
+    role: "DOCTOR", specialty: "GENERAL",
   });
 
   useEffect(() => {
@@ -33,8 +46,11 @@ export default function StaffRegisterPage() {
   }
 
   function resetForm() {
-    setForm({ firstName: "", lastName: "", email: "", password: "",
-      phone: "", documentType: "DNI", documentNumber: "", role: "DOCTOR" });
+    setForm({
+      firstName: "", lastName: "", email: "", password: "",
+      phone: "", documentType: "DNI", documentNumber: "",
+      role: "DOCTOR", specialty: "GENERAL",
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -44,10 +60,15 @@ export default function StaffRegisterPage() {
     setSuccess("");
 
     try {
+      const body = {
+        ...form,
+        specialty: form.role === "DOCTOR" ? form.specialty : undefined,
+      };
+
       const res = await fetch(`${BFF_URL}/api/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -108,6 +129,21 @@ export default function StaffRegisterPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Especialidad — solo visible para DOCTOR */}
+              {form.role === "DOCTOR" && (
+                <div>
+                  <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                    Especialidad médica
+                  </label>
+                  <select value={form.specialty} onChange={(e) => set("specialty", e.target.value)}
+                    className={inputClass} required>
+                    {MEDICAL_SPECIALTIES.map((s) => (
+                      <option key={s} value={s}>{SPECIALTY_LABELS[s]}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <input placeholder="Nombre" value={form.firstName}

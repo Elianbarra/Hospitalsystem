@@ -1,17 +1,20 @@
 package com.hospital.msuser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hospital.msuser.client.UserClient;
 import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
 import com.hospital.msuser.entity.enums.DocumentType;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.entity.enums.UserRole;
 import com.hospital.msuser.exception.GlobalExceptionHandler;
 import com.hospital.msuser.exception.UserAlreadyExistsException;
 import com.hospital.msuser.exception.UserNotFoundException;
+import com.hospital.msuser.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -28,7 +31,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(
+    controllers = UserController.class,
+    excludeAutoConfiguration = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class}
+)
 @Import(GlobalExceptionHandler.class)
 class UserControllerTest {
 
@@ -39,7 +45,9 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserClient userClient;
+    private UserService userService;
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private UserResponseDTO sampleResponse() {
         return UserResponseDTO.builder()
@@ -51,6 +59,22 @@ class UserControllerTest {
                 .documentType(DocumentType.DNI)
                 .documentNumber("12345678")
                 .role(UserRole.PATIENT)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    private UserResponseDTO sampleDoctorResponse() {
+        return UserResponseDTO.builder()
+                .id(UUID.randomUUID())
+                .firstName("Dra. Maria")
+                .lastName("Lopez")
+                .email("maria@hospital.com")
+                .phone("111222333")
+                .documentType(DocumentType.DNI)
+                .documentNumber("99999999")
+                .role(UserRole.DOCTOR)
+                .specialty(MedicalSpecialty.CARDIOLOGY)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -69,9 +93,11 @@ class UserControllerTest {
                 .build();
     }
 
+    // ─── POST /api/users/register ─────────────────────────────────────────────
+
     @Test
     void register_returnsCreated() throws Exception {
-        when(userClient.registerUser(any())).thenReturn(sampleResponse());
+        when(userService.registerUser(any())).thenReturn(sampleResponse());
 
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +124,7 @@ class UserControllerTest {
 
     @Test
     void register_duplicateEmail_returnsConflict() throws Exception {
-        when(userClient.registerUser(any()))
+        when(userService.registerUser(any()))
                 .thenThrow(new UserAlreadyExistsException("El email ya esta registrado: juan@hospital.com"));
 
         mockMvc.perform(post("/api/users/register")
@@ -109,8 +135,34 @@ class UserControllerTest {
     }
 
     @Test
+    void register_doctorWithSpecialty_returnsCreatedWithSpecialty() throws Exception {
+        CreateUserRequestDTO doctorRequest = CreateUserRequestDTO.builder()
+                .firstName("Dra. Maria")
+                .lastName("Lopez")
+                .email("maria@hospital.com")
+                .password("secreto123")
+                .phone("111222333")
+                .documentType(DocumentType.DNI)
+                .documentNumber("99999999")
+                .role(UserRole.DOCTOR)
+                .specialty(MedicalSpecialty.CARDIOLOGY)
+                .build();
+
+        when(userService.registerUser(any())).thenReturn(sampleDoctorResponse());
+
+        mockMvc.perform(post("/api/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(doctorRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.role").value("DOCTOR"))
+                .andExpect(jsonPath("$.specialty").value("CARDIOLOGY"));
+    }
+
+    // ─── GET /api/users ───────────────────────────────────────────────────────
+
+    @Test
     void getAll_returnsOkWithList() throws Exception {
-        when(userClient.getAllActiveUsers()).thenReturn(List.of(sampleResponse(), sampleResponse()));
+        when(userService.getAllActiveUsers()).thenReturn(List.of(sampleResponse(), sampleResponse()));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -120,18 +172,19 @@ class UserControllerTest {
 
     @Test
     void getAll_emptyList_returnsOk() throws Exception {
-        when(userClient.getAllActiveUsers()).thenReturn(List.of());
+        when(userService.getAllActiveUsers()).thenReturn(List.of());
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
+    // ─── GET /api/users/{id} ──────────────────────────────────────────────────
+
     @Test
     void getById_found_returnsOk() throws Exception {
         UUID id = UUID.randomUUID();
-        UserResponseDTO response = sampleResponse();
-        when(userClient.getUserById(id)).thenReturn(response);
+        when(userService.getUserById(id)).thenReturn(sampleResponse());
 
         mockMvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().isOk())
@@ -142,13 +195,28 @@ class UserControllerTest {
     @Test
     void getById_notFound_returns404() throws Exception {
         UUID id = UUID.randomUUID();
-        when(userClient.getUserById(id))
+        when(userService.getUserById(id))
                 .thenThrow(new UserNotFoundException("Usuario no encontrado con id: " + id));
 
         mockMvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").exists());
     }
+
+    // ─── GET /api/users/specialty/{specialty} ────────────────────────────────
+
+    @Test
+    void getBySpecialty_returnsDoctors() throws Exception {
+        when(userService.getDoctorsBySpecialty(MedicalSpecialty.CARDIOLOGY))
+                .thenReturn(List.of(sampleDoctorResponse()));
+
+        mockMvc.perform(get("/api/users/specialty/{specialty}", "CARDIOLOGY"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].specialty").value("CARDIOLOGY"));
+    }
+
+    // ─── PUT /api/users/{id} ──────────────────────────────────────────────────
 
     @Test
     void update_returnsOk() throws Exception {
@@ -158,7 +226,7 @@ class UserControllerTest {
                 .build();
         UserResponseDTO updated = sampleResponse();
         updated.setFirstName("Carlos");
-        when(userClient.updateUser(eq(id), any())).thenReturn(updated);
+        when(userService.updateUser(eq(id), any())).thenReturn(updated);
 
         mockMvc.perform(put("/api/users/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,19 +238,22 @@ class UserControllerTest {
     @Test
     void update_notFound_returns404() throws Exception {
         UUID id = UUID.randomUUID();
-        when(userClient.updateUser(eq(id), any()))
+        when(userService.updateUser(eq(id), any()))
                 .thenThrow(new UserNotFoundException("Usuario no encontrado con id: " + id));
 
         mockMvc.perform(put("/api/users/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UpdateUserRequestDTO.builder().firstName("X").build())))
+                        .content(objectMapper.writeValueAsString(
+                                UpdateUserRequestDTO.builder().firstName("X").build())))
                 .andExpect(status().isNotFound());
     }
+
+    // ─── DELETE /api/users/{id} ───────────────────────────────────────────────
 
     @Test
     void deactivate_returnsNoContent() throws Exception {
         UUID id = UUID.randomUUID();
-        doNothing().when(userClient).deactivateUser(id);
+        doNothing().when(userService).deactivateUser(id);
 
         mockMvc.perform(delete("/api/users/{id}", id))
                 .andExpect(status().isNoContent());
@@ -192,7 +263,7 @@ class UserControllerTest {
     void deactivate_notFound_returns404() throws Exception {
         UUID id = UUID.randomUUID();
         doThrow(new UserNotFoundException("Usuario no encontrado con id: " + id))
-                .when(userClient).deactivateUser(id);
+                .when(userService).deactivateUser(id);
 
         mockMvc.perform(delete("/api/users/{id}", id))
                 .andExpect(status().isNotFound())

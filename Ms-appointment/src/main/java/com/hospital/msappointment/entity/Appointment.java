@@ -1,6 +1,8 @@
 package com.hospital.msappointment.entity;
 
 import com.hospital.msappointment.entity.enums.AppointmentStatus;
+import com.hospital.msappointment.entity.enums.AppointmentType;
+import com.hospital.msappointment.entity.enums.CancelledBy;
 import com.hospital.msappointment.entity.enums.Specialty;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,9 +42,19 @@ public class Appointment {
     private Specialty specialty;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "appointment_type", nullable = false, length = 20)
+    @Builder.Default
+    private AppointmentType appointmentType = AppointmentType.CONSULTA;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default
     private AppointmentStatus status = AppointmentStatus.PENDING;
+
+    /** Quién canceló la cita — null si aún no ha sido cancelada */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cancelled_by", length = 10)
+    private CancelledBy cancelledBy;
 
     @Column(columnDefinition = "TEXT")
     private String notes;

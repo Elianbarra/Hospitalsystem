@@ -10,16 +10,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repositorio de lista de espera.
+ * El ordenamiento correcto de cola (vitalRisk → priority → requeuedAt)
+ * se aplica en la capa de servicio con sort Java para mayor claridad y portabilidad.
+ */
 @Repository
 public interface WaitlistRepository extends JpaRepository<WaitlistEntry, UUID> {
 
-    List<WaitlistEntry> findByActiveTrueOrderByPriorityDescCreatedAtAsc();
+    List<WaitlistEntry> findByActiveTrue();
 
-    List<WaitlistEntry> findByPatientIdAndActiveTrueOrderByCreatedAtAsc(UUID patientId);
+    List<WaitlistEntry> findByPatientIdAndActiveTrueOrderByRequeuedAtAsc(UUID patientId);
 
-    List<WaitlistEntry> findBySpecialtyAndActiveTrueOrderByPriorityDescCreatedAtAsc(Specialty specialty);
+    List<WaitlistEntry> findBySpecialtyAndActiveTrue(Specialty specialty);
 
-    List<WaitlistEntry> findByStatusAndActiveTrueOrderByPriorityDescCreatedAtAsc(WaitlistStatus status);
+    List<WaitlistEntry> findByStatusAndActiveTrue(WaitlistStatus status);
 
     Optional<WaitlistEntry> findByIdAndActiveTrue(UUID id);
+
+    List<WaitlistEntry> findByPatientIdAndSpecialtyAndActiveTrueAndStatusIn(
+            UUID patientId, Specialty specialty, List<WaitlistStatus> statuses);
 }

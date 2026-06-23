@@ -1,6 +1,7 @@
 package com.hospital.msuser.repository;
 
 import com.hospital.msuser.entity.User;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.entity.enums.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -22,4 +23,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findByIsActive(Boolean isActive);
 
     List<User> findByRole(UserRole role);
+
+    /** Médicos activos de una especialidad específica */
+    List<User> findBySpecialtyAndRoleAndIsActiveTrue(MedicalSpecialty specialty, UserRole role);
 }

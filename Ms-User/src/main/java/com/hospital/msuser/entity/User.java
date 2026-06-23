@@ -1,6 +1,7 @@
 package com.hospital.msuser.entity;
 
 import com.hospital.msuser.entity.enums.DocumentType;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,6 +45,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    /**
+     * Especialidad médica. Solo aplica cuando role = DOCTOR.
+     * Para otros roles el valor es null.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "specialty")
+    private MedicalSpecialty specialty;
 
     @Column(name = "is_active")
     @Builder.Default

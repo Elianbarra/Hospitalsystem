@@ -6,14 +6,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 /**
- * Ms-Appointment ya no llama a ms-auth directamente.
- * La validación JWT se hace vía Spring Security OAuth2 Resource Server (JWKS).
- * Solo queda el RestClient para consultar datos de usuario a ms-user.
+ * Ms-Appointment no se comunica directamente con otros microservicios.
+ * Toda la orquestación entre servicios la hace el BFF.
+ * Este bean queda disponible por si en el futuro se requiere alguna consulta interna,
+ * pero actualmente no se usa en producción.
  */
 @Configuration
 public class RestClientConfig {
 
-    @Bean("userRestClient")
+    @Bean("msUserClient")
     public RestClient userRestClient(@Value("${ms-user.base-url}") String baseUrl) {
         return RestClient.builder()
                 .baseUrl(baseUrl)

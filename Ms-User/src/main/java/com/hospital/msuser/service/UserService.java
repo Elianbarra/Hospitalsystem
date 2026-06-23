@@ -6,6 +6,8 @@ import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
 import com.hospital.msuser.entity.User;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
+import com.hospital.msuser.entity.enums.UserRole;
 import com.hospital.msuser.exception.UserAlreadyExistsException;
 import com.hospital.msuser.exception.UserNotFoundException;
 import com.hospital.msuser.repository.UserRepository;
@@ -44,6 +46,7 @@ public class UserService {
                 .documentType(dto.getDocumentType())
                 .documentNumber(dto.getDocumentNumber())
                 .role(dto.getRole())
+                .specialty(dto.getSpecialty())
                 .build();
 
         User saved = userRepository.save(user);
@@ -83,8 +86,16 @@ public class UserService {
         if (dto.getDocumentType() != null)   user.setDocumentType(dto.getDocumentType());
         if (dto.getDocumentNumber() != null) user.setDocumentNumber(dto.getDocumentNumber());
         if (dto.getRole() != null)           user.setRole(dto.getRole());
+        if (dto.getSpecialty() != null)      user.setSpecialty(dto.getSpecialty());
 
         return toResponse(userRepository.save(user));
+    }
+
+    public List<UserResponseDTO> getDoctorsBySpecialty(MedicalSpecialty specialty) {
+        return userRepository.findBySpecialtyAndRoleAndIsActiveTrue(specialty, UserRole.DOCTOR)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public void deactivateUser(UUID id) {
@@ -109,6 +120,7 @@ public class UserService {
                 .documentType(user.getDocumentType())
                 .documentNumber(user.getDocumentNumber())
                 .role(user.getRole())
+                .specialty(user.getSpecialty())
                 .isActive(user.getIsActive())
                 .createdAt(user.getCreatedAt())
                 .build();

@@ -11,8 +11,8 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 3000
+      port: 8090
       targetPort: 8090
-  # LoadBalancer → expone el BFF en localhost:3000 en Docker Desktop
+  # LoadBalancer → expone el BFF en localhost:8090 en Docker Desktop
   # En producción cambiar a ClusterIP + Ingress
   type: LoadBalancer

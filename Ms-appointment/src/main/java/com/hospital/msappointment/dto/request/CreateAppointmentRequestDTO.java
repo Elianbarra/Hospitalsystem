@@ -1,5 +1,6 @@
 package com.hospital.msappointment.dto.request;
 
+import com.hospital.msappointment.entity.enums.AppointmentType;
 import com.hospital.msappointment.entity.enums.Specialty;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -26,6 +27,9 @@ public class CreateAppointmentRequestDTO {
 
     @NotNull(message = "La especialidad es requerida")
     private Specialty specialty;
+
+    /** Tipo de atención: CONSULTA (defecto) o CIRUGIA */
+    private AppointmentType appointmentType = AppointmentType.CONSULTA;
 
     @Size(max = 1000, message = "Las notas no pueden superar los 1000 caracteres")
     private String notes;

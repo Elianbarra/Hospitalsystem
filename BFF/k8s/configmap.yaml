@@ -11,4 +11,4 @@ data:
   MS_USER_URL: "http://ms-user-service:8081"
   MS_APPOINTMENTS_URL: "http://ms-appointment-service:8082"
   MS_WAITLIST_URL: "http://ms-waitlist-svc:8083"
-  FRONTEND_URL: "http://localhost:3001"
+  FRONTEND_URL: "http://localhost:3000"

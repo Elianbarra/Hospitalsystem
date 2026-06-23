@@ -23,7 +23,9 @@ import java.util.List;
  *   PUT    /api/waitlist/{id}                 → ms-waitlist PUT    /api/waitlist/{id}
  *   PUT    /api/waitlist/{id}/cancel          → ms-waitlist PUT    /api/waitlist/{id}/cancel
  *   DELETE /api/waitlist/{id}                 → ms-waitlist DELETE /api/waitlist/{id}
- *   GET    /api/waitlist/patient/{patientId}  → ms-waitlist GET    /api/waitlist/patient/{patientId}
+ *   GET    /api/waitlist/patient/{patientId}           → ms-waitlist GET    /api/waitlist/patient/{patientId}
+ *   GET    /api/waitlist/specialty/{specialty}/next    → ms-waitlist GET    /api/waitlist/specialty/{specialty}/next
+ *   PUT    /api/waitlist/{id}/requeue                  → ms-waitlist PUT    /api/waitlist/{id}/requeue
  */
 @RestController
 @RequestMapping("/api/waitlist")
@@ -79,5 +81,24 @@ public class WaitlistController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<WaitlistEntryResponse>> getByPatient(@PathVariable String patientId) {
         return ResponseEntity.ok(waitlistService.getByPatient(patientId));
+    }
+
+    @Operation(summary = "Lista de espera por especialidad", description = "Devuelve todas las entradas en espera de una especialidad — útil para calcular posición")
+    @GetMapping("/specialty/{specialty}")
+    public ResponseEntity<List<WaitlistEntryResponse>> getBySpecialty(@PathVariable String specialty) {
+        return ResponseEntity.ok(waitlistService.getBySpecialty(specialty));
+    }
+
+    @Operation(summary = "Siguiente en cola", description = "Devuelve el siguiente paciente en cola (WAITING) para una especialidad. 204 si la cola está vacía.")
+    @GetMapping("/specialty/{specialty}/next")
+    public ResponseEntity<WaitlistEntryResponse> getNextForSpecialty(@PathVariable String specialty) {
+        WaitlistEntryResponse next = waitlistService.getNextForSpecialty(specialty);
+        return next != null ? ResponseEntity.ok(next) : ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Reencolar al final", description = "Mueve al paciente al final de la cola cuando cancela su cita (resetea requeuedAt)")
+    @PutMapping("/{id}/requeue")
+    public ResponseEntity<WaitlistEntryResponse> requeueToEnd(@PathVariable String id) {
+        return ResponseEntity.ok(waitlistService.requeueToEnd(id));
     }
 }

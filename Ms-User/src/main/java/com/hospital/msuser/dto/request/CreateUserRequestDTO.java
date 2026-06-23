@@ -1,6 +1,7 @@
 package com.hospital.msuser.dto.request;
 
 import com.hospital.msuser.entity.enums.DocumentType;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.entity.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -39,4 +40,7 @@ public class CreateUserRequestDTO {
 
     @NotNull(message = "El rol es obligatorio")
     private UserRole role;
+
+    /** Especialidad médica — obligatorio cuando role = DOCTOR */
+    private MedicalSpecialty specialty;
 }

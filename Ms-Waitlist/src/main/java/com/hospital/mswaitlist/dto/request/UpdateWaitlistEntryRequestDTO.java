@@ -12,5 +12,7 @@ public class UpdateWaitlistEntryRequestDTO {
 
     private WaitlistStatus status;
     private Priority priority;
+    /** Riesgo vital severo — actualizable en cualquier momento por el médico */
+    private Boolean vitalRisk;
     private String notes;
 }

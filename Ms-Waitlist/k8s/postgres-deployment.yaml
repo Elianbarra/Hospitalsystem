@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-waitlist-postgres
+  namespace: hospital
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-waitlist-postgres
+  template:
+    metadata:
+      labels:
+        app: ms-waitlist-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - name: POSTGRES_DB
+              value: mswaitlist_db
+            - name: POSTGRES_USER
+              value: waitlist_user
+            - name: POSTGRES_PASSWORD
+              value: CHANGE_ME
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: ms-waitlist-postgres-pvc

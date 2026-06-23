@@ -14,6 +14,8 @@ public record CreateAppointmentRequest(
         @NotBlank String patientId,
         @NotBlank String doctorId,
         @NotBlank String specialty,
+        /** CONSULTA (defecto) o CIRUGIA */
+        String appointmentType,
         @NotNull @FutureOrPresent LocalDateTime scheduledAt,
         String notes
 ) {}

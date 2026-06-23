@@ -4,6 +4,6 @@ metadata:
   name: ms-waitlist-config
   namespace: hospital
 data:
-  DB_URL: "jdbc:postgresql://ms-waitlist-postgres-svc:5432/mswaitlist_db"
-  DB_USER: "waitlist_user"
-  MS_AUTH_URL: "http://ms-auth-svc:8080"
+  DB_URL: "jdbc:postgresql://ep-patient-silence-ad1s4w9m-pooler.c-2.us-east-1.aws.neon.tech/mswaitlist_db?sslmode=require"
+  DB_USER: "neondb_owner"
+  MS_AUTH_URL: "http://ms-auth-service:8080"

@@ -1,5 +1,6 @@
 package com.hospital.mswaitlist.entity;
 
+import com.hospital.mswaitlist.entity.enums.AppointmentType;
 import com.hospital.mswaitlist.entity.enums.Priority;
 import com.hospital.mswaitlist.entity.enums.Specialty;
 import com.hospital.mswaitlist.entity.enums.WaitlistStatus;
@@ -31,6 +32,12 @@ public class WaitlistEntry {
     @Column(nullable = false)
     private Specialty specialty;
 
+    /** Tipo de atención que el paciente requiere (consulta o cirugía) */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "appointment_type", nullable = false)
+    @Builder.Default
+    private AppointmentType appointmentType = AppointmentType.CONSULTA;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
@@ -41,8 +48,25 @@ public class WaitlistEntry {
     @Builder.Default
     private WaitlistStatus status = WaitlistStatus.WAITING;
 
+    /**
+     * Indica riesgo vital severo. Cuando es true, el paciente sube
+     * automáticamente al tope de la cola independiente de su prioridad.
+     * Actualizable en cualquier momento por el médico.
+     */
+    @Column(name = "vital_risk", nullable = false)
+    @Builder.Default
+    private Boolean vitalRisk = false;
+
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    /**
+     * Timestamp efectivo de posición en cola.
+     * Igual a createdAt en inscripción inicial.
+     * Se actualiza a NOW() cuando el paciente cancela y vuelve al final de la cola.
+     */
+    @Column(name = "requeued_at", nullable = false)
+    private LocalDateTime requeuedAt;
 
     @Column(nullable = false)
     @Builder.Default

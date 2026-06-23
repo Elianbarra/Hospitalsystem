@@ -148,4 +148,46 @@ public class AppointmentService {
             throw new ApiException(503, "ms-appointment unavailable — pendiente de implementación");
         }
     }
+
+    /**
+     * Cancela la cita registrando que fue el médico quien canceló.
+     * El BFF llama a PUT /api/appointments/{id}/cancel-doctor en ms-appointment.
+     * La reasignación automática la orquesta ReasignacionService.
+     */
+    public AppointmentResponse cancelByDoctor(String id) {
+        log.debug("BFF → ms-appointment  PUT /api/appointments/{}/cancel-doctor", id);
+        try {
+            return appointmentClient.put()
+                    .uri("/api/appointments/{id}/cancel-doctor", id)
+                    .retrieve()
+                    .body(AppointmentResponse.class);
+        } catch (HttpClientErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), "ms-appointment error");
+        } catch (ResourceAccessException e) {
+            throw new ApiException(503, "ms-appointment unavailable");
+        }
+    }
+
+    /**
+     * Cancela la cita registrando que fue el paciente quien canceló.
+     * El BFF llama a PUT /api/appointments/{id}/cancel-patient en ms-appointment.
+     * El reencola en waitlist lo orquesta ReasignacionService.
+     */
+    public AppointmentResponse cancelByPatient(String id) {
+        log.debug("BFF → ms-appointment  PUT /api/appointments/{}/cancel-patient", id);
+        try {
+            return appointmentClient.put()
+                    .uri("/api/appointments/{id}/cancel-patient", id)
+                    .retrieve()
+                    .body(AppointmentResponse.class);
+        } catch (HttpClientErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), "ms-appointment error");
+        } catch (ResourceAccessException e) {
+            throw new ApiException(503, "ms-appointment unavailable");
+        }
+    }
 }

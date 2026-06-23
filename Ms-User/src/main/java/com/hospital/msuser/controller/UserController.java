@@ -3,6 +3,7 @@ package com.hospital.msuser.controller;
 import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -51,6 +52,13 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequestDTO dto) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
+    }
+
+    @Operation(summary = "Médicos por especialidad", description = "Devuelve médicos activos de una especialidad específica")
+    @GetMapping("/specialty/{specialty}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<UserResponseDTO>> getBySpecialty(@PathVariable MedicalSpecialty specialty) {
+        return ResponseEntity.ok(userService.getDoctorsBySpecialty(specialty));
     }
 
     @Operation(summary = "Desactivar usuario", description = "Realiza un soft-delete desactivando la cuenta del usuario")

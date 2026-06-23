@@ -1,6 +1,7 @@
 package com.hospital.msuser.dto.response;
 
 import com.hospital.msuser.entity.enums.DocumentType;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
 import com.hospital.msuser.entity.enums.UserRole;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class UserResponseDTO {
     private DocumentType documentType;
     private String documentNumber;
     private UserRole role;
+    private MedicalSpecialty specialty;
     private Boolean isActive;
     private LocalDateTime createdAt;
 }

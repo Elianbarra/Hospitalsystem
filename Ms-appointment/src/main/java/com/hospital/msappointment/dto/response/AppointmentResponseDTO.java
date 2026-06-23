@@ -1,6 +1,8 @@
 package com.hospital.msappointment.dto.response;
 
 import com.hospital.msappointment.entity.enums.AppointmentStatus;
+import com.hospital.msappointment.entity.enums.AppointmentType;
+import com.hospital.msappointment.entity.enums.CancelledBy;
 import com.hospital.msappointment.entity.enums.Specialty;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +19,10 @@ public class AppointmentResponseDTO {
     private LocalDateTime scheduledAt;
     private Integer durationMinutes;
     private Specialty specialty;
+    private AppointmentType appointmentType;
     private AppointmentStatus status;
+    /** Quién canceló la cita; null si no fue cancelada */
+    private CancelledBy cancelledBy;
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

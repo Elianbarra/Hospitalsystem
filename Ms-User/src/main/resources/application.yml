@@ -7,6 +7,14 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASS:password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 0
+      max-lifetime: 30000
+      keepalive-time: 15000
+      connection-timeout: 10000
+      idle-timeout: 20000
+      connection-test-query: SELECT 1
 
   jpa:
     hibernate:
@@ -35,3 +43,10 @@ server:
 # URL de ms-auth usada por el RestClient para registrar credenciales
 ms-auth:
   base-url: ${MS_AUTH_URL:http://localhost:8080}
+
+logging:
+  level:
+    com.hospital.msuser: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    com.zaxxer.hikari: DEBUG

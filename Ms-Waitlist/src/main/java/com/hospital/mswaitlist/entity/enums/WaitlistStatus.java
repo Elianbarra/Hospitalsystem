@@ -7,6 +7,8 @@ public enum WaitlistStatus {
     NOTIFIED,
     /** Cupo asignado — paciente sale de la lista */
     ASSIGNED,
+    /** Hora liberada ofrecida al paciente — espera confirmación ese mismo día */
+    OFFERED,
     /** Entrada cancelada por el paciente o administrativo */
     CANCELLED
 }

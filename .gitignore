@@ -22,6 +22,9 @@ build/
 *.ipr
 out/
 
+# Clases compiladas (Eclipse/VSCode bin/)
+**/bin/
+
 # macOS
 .DS_Store
 
@@ -31,3 +34,7 @@ out/
 # Variables de entorno locales
 .env
 .env.local
+
+# Playwright
+Frontend/playwright-report/
+Frontend/test-results/
