@@ -1,0 +1,128 @@
+package com.hospital.msuser.service;
+
+import com.hospital.msuser.client.auth.AuthRestClient;
+import com.hospital.msuser.dto.auth.RegisterAuthRequestDTO;
+import com.hospital.msuser.dto.request.CreateUserRequestDTO;
+import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
+import com.hospital.msuser.dto.response.UserResponseDTO;
+import com.hospital.msuser.entity.User;
+import com.hospital.msuser.entity.enums.MedicalSpecialty;
+import com.hospital.msuser.entity.enums.UserRole;
+import com.hospital.msuser.exception.UserAlreadyExistsException;
+import com.hospital.msuser.exception.UserNotFoundException;
+import com.hospital.msuser.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Capa de lógica de negocio para gestión de usuarios.
+ * Coordina el repositorio y el cliente externo ms-auth.
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final AuthRestClient authRestClient;
+
+    public UserResponseDTO registerUser(CreateUserRequestDTO dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new UserAlreadyExistsException("El email ya está registrado: " + dto.getEmail());
+        }
+        if (userRepository.existsByDocumentNumber(dto.getDocumentNumber())) {
+            throw new UserAlreadyExistsException("El documento ya está registrado: " + dto.getDocumentNumber());
+        }
+
+        User user = User.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .documentType(dto.getDocumentType())
+                .documentNumber(dto.getDocumentNumber())
+                .role(dto.getRole())
+                .specialty(dto.getSpecialty())
+                .build();
+
+        User saved = userRepository.save(user);
+        log.info("Usuario creado con id: {}", saved.getId());
+
+        // Registra las credenciales en ms-auth
+        RegisterAuthRequestDTO authRequest = RegisterAuthRequestDTO.builder()
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .role(dto.getRole().name())
+                .userId(saved.getId())
+                .build();
+
+        authRestClient.registerUserCredentials(authRequest);
+        log.info("Credenciales enviadas a ms-auth para: {}", dto.getEmail());
+
+        return toResponse(saved);
+    }
+
+    public UserResponseDTO getUserById(UUID id) {
+        return toResponse(findOrThrow(id));
+    }
+
+    public List<UserResponseDTO> getAllActiveUsers() {
+        return userRepository.findByIsActive(true)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public UserResponseDTO updateUser(UUID id, UpdateUserRequestDTO dto) {
+        User user = findOrThrow(id);
+
+        if (dto.getFirstName() != null)      user.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null)       user.setLastName(dto.getLastName());
+        if (dto.getPhone() != null)          user.setPhone(dto.getPhone());
+        if (dto.getDocumentType() != null)   user.setDocumentType(dto.getDocumentType());
+        if (dto.getDocumentNumber() != null) user.setDocumentNumber(dto.getDocumentNumber());
+        if (dto.getRole() != null)           user.setRole(dto.getRole());
+        if (dto.getSpecialty() != null)      user.setSpecialty(dto.getSpecialty());
+
+        return toResponse(userRepository.save(user));
+    }
+
+    public List<UserResponseDTO> getDoctorsBySpecialty(MedicalSpecialty specialty) {
+        return userRepository.findBySpecialtyAndRoleAndIsActiveTrue(specialty, UserRole.DOCTOR)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public void deactivateUser(UUID id) {
+        User user = findOrThrow(id);
+        user.setIsActive(false);
+        userRepository.save(user);
+        log.info("Usuario desactivado: {}", id);
+    }
+
+    private User findOrThrow(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + id));
+    }
+
+    private UserResponseDTO toResponse(User user) {
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .documentType(user.getDocumentType())
+                .documentNumber(user.getDocumentNumber())
+                .role(user.getRole())
+                .specialty(user.getSpecialty())
+                .isActive(user.getIsActive())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+}
