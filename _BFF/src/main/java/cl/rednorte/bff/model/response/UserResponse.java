@@ -9,6 +9,7 @@ public record UserResponse(
         String documentType,
         String documentNumber,
         String role,
+        String specialty,   // solo para DOCTOR; null para otros roles
         boolean isActive,
         String createdAt
 ) {}

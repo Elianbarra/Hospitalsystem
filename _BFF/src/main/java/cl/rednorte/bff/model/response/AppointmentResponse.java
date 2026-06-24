@@ -7,8 +7,10 @@ public record AppointmentResponse(
         String patientId,
         String doctorId,
         String specialty,
+        String appointmentType,  // CONSULTA | CIRUGIA
         LocalDateTime scheduledAt,
-        String status,        // PENDING | CONFIRMED | CANCELLED | COMPLETED
+        String status,           // PENDING | CONFIRMED | CANCELLED | COMPLETED
+        String cancelledBy,      // DOCTOR | PATIENT | null
         String notes,
         String createdAt
 ) {}

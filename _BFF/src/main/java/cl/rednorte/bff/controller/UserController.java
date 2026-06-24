@@ -60,6 +60,12 @@ public class UserController {
         return ResponseEntity.ok(userService.update(id, request));
     }
 
+    @Operation(summary = "Médicos por especialidad", description = "Lista médicos activos de una especialidad específica (CARDIOLOGY, NEUROLOGY, etc.)")
+    @GetMapping("/specialty/{specialty}")
+    public ResponseEntity<List<UserResponse>> getBySpecialty(@PathVariable String specialty) {
+        return ResponseEntity.ok(userService.getBySpecialty(specialty));
+    }
+
     @Operation(summary = "Desactivar usuario", description = "Realiza un soft-delete desactivando la cuenta del usuario")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable String id) {

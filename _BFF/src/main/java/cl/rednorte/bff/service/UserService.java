@@ -96,6 +96,22 @@ public class UserService {
         }
     }
 
+    public List<UserResponse> getBySpecialty(String specialty) {
+        log.debug("BFF → ms-user  GET /api/users/specialty/{}", specialty);
+        try {
+            return userClient.get()
+                    .uri("/api/users/specialty/{specialty}", specialty)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+        } catch (HttpClientErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), e.getMessage(), e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            throw new ApiException(e.getStatusCode().value(), "ms-user error");
+        } catch (ResourceAccessException e) {
+            throw new ApiException(503, "ms-user unavailable");
+        }
+    }
+
     public void deactivate(String id) {
         log.debug("BFF → ms-user  DELETE /api/users/{}", id);
         try {

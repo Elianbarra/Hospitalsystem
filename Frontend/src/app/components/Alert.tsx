@@ -11,10 +11,10 @@ interface AlertProps {
   className?: string;
 }
 
-export function Alert({ variant, message, className = "mb-5" }: AlertProps) {
-  return (
+const Alert =({ variant, message, className = "mb-5" }: AlertProps) => (
     <div className={`border text-sm px-4 py-3 rounded-xl ${STYLES[variant]} ${className}`}>
       {message}
     </div>
   );
-}
+
+export default Alert;
