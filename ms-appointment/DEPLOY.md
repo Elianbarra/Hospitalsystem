@@ -203,7 +203,7 @@ kubectl rollout status deployment/ms-appointment -n hospital
 
 ```bash
 # Desde la carpeta ms-appointment/
-cd Ms-appointment
+cd ms-appointment
 
 # 1. Inicializar el repositorio local
 git init

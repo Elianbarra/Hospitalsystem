@@ -1,1 +1,1 @@
-rootProject.name = "Ms-Waitlist"
+rootProject.name = "ms-waitlist"

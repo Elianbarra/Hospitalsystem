@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SimpleNav } from "@/app/components/SimpleNav";
-import { Alert } from "@/app/components/Alert";
+import Alert from "@/app/components/Alert";
 import { DOC_TYPES, DOC_LABELS, STAFF_ROLES, ROLE_LABELS, ROLE_COLORS } from "@/features/users/users.constants";
 import { inputClass } from "@/lib/styles";
 import { getSession } from "@/lib/session";

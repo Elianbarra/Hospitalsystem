@@ -88,7 +88,7 @@ return ResponseEntity.status(201).body(appointmentClient.createAppointment(dto))
 ## Estructura del Proyecto
 
 ```
-Ms-appointment/
+ms-appointment/
 ├── Dockerfile
 ├── .env.example
 ├── build.gradle.kts

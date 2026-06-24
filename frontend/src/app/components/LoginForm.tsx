@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Alert } from "./Alert";
+import Alert from "./Alert";
 import { BFF_URL } from "@/lib/bff";
 
 export function LoginForm() {

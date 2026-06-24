@@ -72,8 +72,8 @@ services:
 
   ms-auth:
     build:
-      context: ./Ms-Auth
-    # Sin ports: solo accesible internamente por el BFF (igual que ClusterIP en K8s)
+      context: ./ms-auth
+    # Sin ports: solo accesible internamente por el bff (igual que ClusterIP en K8s)
     environment:
       DB_URL: jdbc:postgresql://postgres-auth:5432/msauth_db
       DB_USER: msauth_user
@@ -83,7 +83,7 @@ services:
       SECURITY_JWT_PRIVATE_KEY_PATH: /keys/private_key.pem
       SECURITY_JWT_PUBLIC_KEY_PATH: /keys/public_key.pem
     volumes:
-      - ./Ms-Auth/volumes/ms-auth/keys:/keys:ro
+      - ./ms-auth/volumes/ms-auth/keys:/keys:ro
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -96,8 +96,8 @@ services:
 
   ms-user:
     build:
-      context: ./Ms-User
-    # Sin ports: solo accesible internamente por el BFF
+      context: ./ms-user
+    # Sin ports: solo accesible internamente por el bff
     environment:
       DB_URL: jdbc:postgresql://postgres-user:5432/msuser_db
       DB_USER: msuser_user
@@ -111,8 +111,8 @@ services:
 
   ms-appointment:
     build:
-      context: ./Ms-appointment
-    # Sin ports: solo accesible internamente por el BFF
+      context: ./ms-appointment
+    # Sin ports: solo accesible internamente por el bff
     environment:
       DB_URL: jdbc:postgresql://postgres-appointment:5432/msappointment_db
       DB_USER: msappointment_user
@@ -129,8 +129,8 @@ services:
 
   ms-waitlist:
     build:
-      context: ./Ms-Waitlist
-    # Sin ports: solo accesible internamente por el BFF
+      context: ./ms-waitlist
+    # Sin ports: solo accesible internamente por el bff
     environment:
       DB_URL: jdbc:postgresql://postgres-waitlist:5432/mswaitlist_db
       DB_USER: waitlist_user
@@ -144,7 +144,7 @@ services:
 
   bff:
     build:
-      context: ./BFF
+      context: ./bff
     ports:
       - "3000:8090"
     environment:

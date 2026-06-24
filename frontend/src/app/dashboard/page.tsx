@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { HospitalLogo } from "@/app/components/HospitalLogo";
-import { Alert } from "@/app/components/Alert";
+import Alert from "@/app/components/Alert";
 import { ROLE_LABELS, DOC_LABELS } from "@/features/users/users.constants";
 import { getSession, clearSession } from "@/lib/session";
 import { BFF_URL } from "@/lib/bff";

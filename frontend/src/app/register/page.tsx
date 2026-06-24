@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SimpleNav } from "@/app/components/SimpleNav";
-import { Alert } from "@/app/components/Alert";
+import Alert from "@/app/components/Alert";
 import { DOC_TYPES, DOC_LABELS } from "@/features/users/users.constants";
 import { inputClass } from "@/lib/styles";
 import { BFF_URL } from "@/lib/bff";
