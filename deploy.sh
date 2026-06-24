@@ -13,7 +13,7 @@ echo "🏥 Sistema Hospitalario — Deploy en Kubernetes"
 echo "=============================================="
 
 # ── 1. Compilar JARs localmente ───────────────────────────────────────────────
-export JDK_JAVA_OPTIONS="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"
+export JDK_JAVA_OPTIONS="--enable-native-access=ALL-UNNAMED"
 
 echo ""
 echo "🔨 Compilando JARs con Gradle (usando Java 25 local)..."
