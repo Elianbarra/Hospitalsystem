@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HOSPITAL_CONFIG } from "@/lib/hospitalConfig";
 
 interface HospitalLogoProps {
   size?: "sm" | "md";
@@ -7,8 +8,8 @@ interface HospitalLogoProps {
 }
 
 const DEFAULT_SUBTITLE: Record<"sm" | "md", string> = {
-  sm: "Av. de la Salud 124, 28001 Madrid",
-  md: "Sistema de salud integral",
+  sm: HOSPITAL_CONFIG.address,
+  md: HOSPITAL_CONFIG.tagline,
 };
 
 export function HospitalLogo({ size = "md", href, subtitle }: HospitalLogoProps) {

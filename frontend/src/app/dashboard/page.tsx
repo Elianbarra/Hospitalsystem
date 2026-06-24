@@ -394,8 +394,8 @@ export default function Dashboard() {
   async function cancelAppointment(appt: Appointment) {
     const endpoint =
       sessionRole === "DOCTOR"
-        ? `${BFF_URL}/api/reasignacion/cancel-doctor/${appt.id}`
-        : `${BFF_URL}/api/reasignacion/cancel-patient/${appt.id}`;
+        ? `${BFF_URL}/api/reassignment/cancel-doctor/${appt.id}`
+        : `${BFF_URL}/api/reassignment/cancel-patient/${appt.id}`;
 
     try {
       const res = await fetch(endpoint, {

@@ -51,8 +51,8 @@ La URL base del BFF se define en `src/lib/bff.ts` y se inyecta vía variable de 
 | `dashboard/page.tsx` | POST | `/api/waitlist` |
 | `dashboard/page.tsx` | PUT | `/api/waitlist/{id}` |
 | `dashboard/page.tsx` | PUT | `/api/waitlist/{id}/cancel` |
-| `dashboard/page.tsx` | PUT | `/api/reasignacion/cancel-doctor/{id}` |
-| `dashboard/page.tsx` | PUT | `/api/reasignacion/cancel-patient/{id}` |
+| `dashboard/page.tsx` | PUT | `/api/reassignment/cancel-doctor/{id}` |
+| `dashboard/page.tsx` | PUT | `/api/reassignment/cancel-patient/{id}` |
 
 ### Flujo de autenticación
 
