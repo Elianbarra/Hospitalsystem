@@ -13,11 +13,8 @@ spring:
   flyway:
     enabled: false
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          ms-auth:
-            url: http://localhost:8080
-            connect-timeout: 5000
-            read-timeout: 5000
+  main:
+    allow-bean-definition-overriding: true
+
+ms-auth:
+  base-url: http://localhost:8080

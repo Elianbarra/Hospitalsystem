@@ -16,7 +16,7 @@ public class AuthRestClient {
 
     private final RestClient restClient;
 
-    public AuthRestClient(@Qualifier("authRestClient") RestClient restClient) {
+    public AuthRestClient(@Qualifier("msAuthRestClient") RestClient restClient) {
         this.restClient = restClient;
     }
 

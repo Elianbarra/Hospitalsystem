@@ -1,6 +1,6 @@
-package com.hospital.msuser.client;
+package com.hospital.msuser.service;
 
-import com.hospital.msuser.client.auth.AuthFeignClient;
+import com.hospital.msuser.client.auth.AuthRestClient;
 import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
@@ -26,16 +26,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserClientTest {
+class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
     @Mock
-    private AuthFeignClient authFeignClient;
+    private AuthRestClient authRestClient;
 
     @InjectMocks
-    private UserClient userClient;
+    private UserService userService;
 
     private User sampleUser() {
         return User.builder()
@@ -71,14 +71,14 @@ class UserClientTest {
         when(userRepository.existsByEmail("juan@hospital.com")).thenReturn(false);
         when(userRepository.existsByDocumentNumber("12345678")).thenReturn(false);
         when(userRepository.save(any())).thenReturn(saved);
-        doNothing().when(authFeignClient).registerUserCredentials(any());
+        doNothing().when(authRestClient).registerUserCredentials(any());
 
-        UserResponseDTO result = userClient.registerUser(sampleCreateDTO());
+        UserResponseDTO result = userService.registerUser(sampleCreateDTO());
 
         assertThat(result.getEmail()).isEqualTo("juan@hospital.com");
         assertThat(result.getRole()).isEqualTo(UserRole.PATIENT);
         assertThat(result.getIsActive()).isTrue();
-        verify(authFeignClient).registerUserCredentials(any());
+        verify(authRestClient).registerUserCredentials(any());
         verify(userRepository).save(any());
     }
 
@@ -86,12 +86,12 @@ class UserClientTest {
     void registerUser_duplicateEmail_throwsUserAlreadyExistsException() {
         when(userRepository.existsByEmail("juan@hospital.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> userClient.registerUser(sampleCreateDTO()))
+        assertThatThrownBy(() -> userService.registerUser(sampleCreateDTO()))
                 .isInstanceOf(UserAlreadyExistsException.class)
                 .hasMessageContaining("juan@hospital.com");
 
         verify(userRepository, never()).save(any());
-        verifyNoInteractions(authFeignClient);
+        verifyNoInteractions(authRestClient);
     }
 
     @Test
@@ -99,12 +99,12 @@ class UserClientTest {
         when(userRepository.existsByEmail(any())).thenReturn(false);
         when(userRepository.existsByDocumentNumber("12345678")).thenReturn(true);
 
-        assertThatThrownBy(() -> userClient.registerUser(sampleCreateDTO()))
+        assertThatThrownBy(() -> userService.registerUser(sampleCreateDTO()))
                 .isInstanceOf(UserAlreadyExistsException.class)
                 .hasMessageContaining("12345678");
 
         verify(userRepository, never()).save(any());
-        verifyNoInteractions(authFeignClient);
+        verifyNoInteractions(authRestClient);
     }
 
     @Test
@@ -112,7 +112,7 @@ class UserClientTest {
         User user = sampleUser();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        UserResponseDTO result = userClient.getUserById(user.getId());
+        UserResponseDTO result = userService.getUserById(user.getId());
 
         assertThat(result.getId()).isEqualTo(user.getId());
         assertThat(result.getFirstName()).isEqualTo("Juan");
@@ -124,7 +124,7 @@ class UserClientTest {
         UUID id = UUID.randomUUID();
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userClient.getUserById(id))
+        assertThatThrownBy(() -> userService.getUserById(id))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(id.toString());
     }
@@ -133,7 +133,7 @@ class UserClientTest {
     void getAllActiveUsers_returnsMappedList() {
         when(userRepository.findByIsActive(true)).thenReturn(List.of(sampleUser(), sampleUser()));
 
-        List<UserResponseDTO> result = userClient.getAllActiveUsers();
+        List<UserResponseDTO> result = userService.getAllActiveUsers();
 
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(u -> Boolean.TRUE.equals(u.getIsActive()));
@@ -143,7 +143,7 @@ class UserClientTest {
     void getAllActiveUsers_emptyRepo_returnsEmptyList() {
         when(userRepository.findByIsActive(true)).thenReturn(List.of());
 
-        List<UserResponseDTO> result = userClient.getAllActiveUsers();
+        List<UserResponseDTO> result = userService.getAllActiveUsers();
 
         assertThat(result).isEmpty();
     }
@@ -158,11 +158,11 @@ class UserClientTest {
                 .firstName("Carlos")
                 .build();
 
-        userClient.updateUser(user.getId(), dto);
+        userService.updateUser(user.getId(), dto);
 
         assertThat(user.getFirstName()).isEqualTo("Carlos");
-        assertThat(user.getLastName()).isEqualTo("Perez"); // sin cambio
-        assertThat(user.getPhone()).isEqualTo("999888777"); // sin cambio
+        assertThat(user.getLastName()).isEqualTo("Perez");
+        assertThat(user.getPhone()).isEqualTo("999888777");
         verify(userRepository).save(user);
     }
 
@@ -171,7 +171,7 @@ class UserClientTest {
         UUID id = UUID.randomUUID();
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userClient.updateUser(id, UpdateUserRequestDTO.builder().firstName("X").build()))
+        assertThatThrownBy(() -> userService.updateUser(id, UpdateUserRequestDTO.builder().firstName("X").build()))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(id.toString());
     }
@@ -182,7 +182,7 @@ class UserClientTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(user);
 
-        userClient.deactivateUser(user.getId());
+        userService.deactivateUser(user.getId());
 
         assertThat(user.getIsActive()).isFalse();
         verify(userRepository).save(user);
@@ -193,7 +193,7 @@ class UserClientTest {
         UUID id = UUID.randomUUID();
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userClient.deactivateUser(id))
+        assertThatThrownBy(() -> userService.deactivateUser(id))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining(id.toString());
     }

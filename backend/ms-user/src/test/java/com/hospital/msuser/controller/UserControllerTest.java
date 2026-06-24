@@ -1,7 +1,7 @@
 package com.hospital.msuser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hospital.msuser.client.UserClient;
+import com.hospital.msuser.service.UserService;
 import com.hospital.msuser.dto.request.CreateUserRequestDTO;
 import com.hospital.msuser.dto.request.UpdateUserRequestDTO;
 import com.hospital.msuser.dto.response.UserResponseDTO;
@@ -12,8 +12,10 @@ import com.hospital.msuser.exception.UserAlreadyExistsException;
 import com.hospital.msuser.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,7 +30,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(
+    controllers = UserController.class,
+    excludeAutoConfiguration = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class}
+)
 @Import(GlobalExceptionHandler.class)
 class UserControllerTest {
 
@@ -38,8 +43,8 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private UserClient userClient;
+    @MockitoBean
+    private UserService userService;
 
     private UserResponseDTO sampleResponse() {
         return UserResponseDTO.builder()
@@ -71,7 +76,7 @@ class UserControllerTest {
 
     @Test
     void register_returnsCreated() throws Exception {
-        when(userClient.registerUser(any())).thenReturn(sampleResponse());
+        when(userService.registerUser(any())).thenReturn(sampleResponse());
 
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +103,7 @@ class UserControllerTest {
 
     @Test
     void register_duplicateEmail_returnsConflict() throws Exception {
-        when(userClient.registerUser(any()))
+        when(userService.registerUser(any()))
                 .thenThrow(new UserAlreadyExistsException("El email ya esta registrado: juan@hospital.com"));
 
         mockMvc.perform(post("/api/users/register")
@@ -110,7 +115,7 @@ class UserControllerTest {
 
     @Test
     void getAll_returnsOkWithList() throws Exception {
-        when(userClient.getAllActiveUsers()).thenReturn(List.of(sampleResponse(), sampleResponse()));
+        when(userService.getAllActiveUsers()).thenReturn(List.of(sampleResponse(), sampleResponse()));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -120,7 +125,7 @@ class UserControllerTest {
 
     @Test
     void getAll_emptyList_returnsOk() throws Exception {
-        when(userClient.getAllActiveUsers()).thenReturn(List.of());
+        when(userService.getAllActiveUsers()).thenReturn(List.of());
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -131,7 +136,7 @@ class UserControllerTest {
     void getById_found_returnsOk() throws Exception {
         UUID id = UUID.randomUUID();
         UserResponseDTO response = sampleResponse();
-        when(userClient.getUserById(id)).thenReturn(response);
+        when(userService.getUserById(id)).thenReturn(response);
 
         mockMvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().isOk())
@@ -142,7 +147,7 @@ class UserControllerTest {
     @Test
     void getById_notFound_returns404() throws Exception {
         UUID id = UUID.randomUUID();
-        when(userClient.getUserById(id))
+        when(userService.getUserById(id))
                 .thenThrow(new UserNotFoundException("Usuario no encontrado con id: " + id));
 
         mockMvc.perform(get("/api/users/{id}", id))
@@ -158,7 +163,7 @@ class UserControllerTest {
                 .build();
         UserResponseDTO updated = sampleResponse();
         updated.setFirstName("Carlos");
-        when(userClient.updateUser(eq(id), any())).thenReturn(updated);
+        when(userService.updateUser(eq(id), any())).thenReturn(updated);
 
         mockMvc.perform(put("/api/users/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +175,7 @@ class UserControllerTest {
     @Test
     void update_notFound_returns404() throws Exception {
         UUID id = UUID.randomUUID();
-        when(userClient.updateUser(eq(id), any()))
+        when(userService.updateUser(eq(id), any()))
                 .thenThrow(new UserNotFoundException("Usuario no encontrado con id: " + id));
 
         mockMvc.perform(put("/api/users/{id}", id)
@@ -182,7 +187,7 @@ class UserControllerTest {
     @Test
     void deactivate_returnsNoContent() throws Exception {
         UUID id = UUID.randomUUID();
-        doNothing().when(userClient).deactivateUser(id);
+        doNothing().when(userService).deactivateUser(id);
 
         mockMvc.perform(delete("/api/users/{id}", id))
                 .andExpect(status().isNoContent());
@@ -192,7 +197,7 @@ class UserControllerTest {
     void deactivate_notFound_returns404() throws Exception {
         UUID id = UUID.randomUUID();
         doThrow(new UserNotFoundException("Usuario no encontrado con id: " + id))
-                .when(userClient).deactivateUser(id);
+                .when(userService).deactivateUser(id);
 
         mockMvc.perform(delete("/api/users/{id}", id))
                 .andExpect(status().isNotFound())
