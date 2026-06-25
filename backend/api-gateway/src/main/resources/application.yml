@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: api-gateway
+
+  # ── JWT: valida el token antes de reenviar al BFF ──────────────────────────
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MS_AUTH_URL:http://localhost:8080}/.well-known/jwks.json
+
+  # ── Spring Cloud Gateway — tabla de rutas ──────────────────────────────────
+  cloud:
+    # Spring Cloud 2024.0.x solo valida hasta Boot 3.4.x — deshabilitar el check
+    # Las librerias son funcionalmente compatibles con Boot 3.5.3
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      # CORS centralizado: el BFF ya no necesita configurarlo
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: ${FRONTEND_URL:http://localhost:3001}
+            allowedMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+      routes:
+        # ── Autenticación (rutas públicas — no requieren JWT) ──────────────
+        - id: auth-login
+          uri: ${BFF_URL:http://localhost:8090}
+          predicates:
+            - Path=/api/auth/login, /api/auth/register
+          filters:
+            - name: RequestHeaderSize
+              args:
+                maxSize: 16KB
+
+        # ── Todas las demás rutas del BFF (requieren JWT válido) ───────────
+        - id: bff-protected
+          uri: ${BFF_URL:http://localhost:8090}
+          predicates:
+            - Path=/api/**
+          filters:
+            - name: RequestHeaderSize
+              args:
+                maxSize: 16KB
+
+# ── Puerto del gateway ────────────────────────────────────────────────────────
+server:
+  port: ${PORT:8091}
+
+# ── Actuator — solo health expuesto (para K8s probes) ────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: never
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.hospital.apigateway: DEBUG

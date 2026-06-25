@@ -13,6 +13,6 @@ spec:
       protocol: TCP
       port: 8090
       targetPort: 8090
-  # LoadBalancer → expone el BFF en localhost:8090 en Docker Desktop
-  # En producción cambiar a ClusterIP + Ingress
-  type: LoadBalancer
+  # ClusterIP — solo accesible internamente desde el api-gateway
+  # El punto de entrada externo ahora es api-gateway (:8091)
+  type: ClusterIP
