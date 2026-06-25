@@ -13,8 +13,11 @@ Internet
 [ Frontend ]  (Next.js — puerto 3001)
     │  fetch() desde el navegador (cliente)
     ▼ HTTP + JWT
-[ BFF ]  ← único punto de entrada externo (puerto 8090)
-    │    Valida JWT vía JWKS antes de rutear
+[ api-gateway ]  ← único punto de entrada externo (puerto 8091)
+    │    Valida JWT vía JWKS — rechaza requests sin token antes de llegar al BFF
+    │    Gestiona CORS de forma centralizada
+    ▼
+[ BFF ]  (puerto 8090 — ClusterIP, solo accesible internamente)
     │    Orquesta TODA la comunicación entre microservicios
     │
     ├──▶ [ ms-auth       :8080 ]  Autenticación — emite JWT con RSA
@@ -25,7 +28,7 @@ Internet
 
 > **Regla de arquitectura:** Los microservicios NO se comunican entre sí directamente. Toda orquestación pasa por el BFF. La única excepción es ms-user → ms-auth para registrar credenciales al momento de crear un usuario.
 
-Todos los microservicios son **ClusterIP** (solo accesibles internamente en K8s). El BFF es el único que recibe tráfico externo.
+Todos los servicios son **ClusterIP** (solo accesibles internamente en K8s). El **api-gateway** es el único con `LoadBalancer` — único punto de entrada externo al cluster.
 
 ---
 
@@ -218,13 +221,14 @@ Los valores reutilizables (roles, tipos de documento, etiquetas, clases CSS) est
 
 ## Microservicios
 
-| Servicio | Puerto | Responsabilidad | Base de datos |
-|---|---|---|---|
-| ms-auth | 8080 | Autenticación, emisión y validación de JWT RSA | NeonDB (PostgreSQL) |
-| ms-user | 8081 | CRUD de usuarios (pacientes, médicos, administrativos) | NeonDB (PostgreSQL) |
-| ms-appointment | 8082 | Gestión de citas médicas | NeonDB (PostgreSQL) |
-| ms-waitlist | 8083 | Lista de espera con estrategias de prioridad | NeonDB (PostgreSQL) |
-| BFF | 8090 | Orquestador — valida JWT y rutea al ms correspondiente | — |
+| Servicio | Puerto | Tipo K8s | Responsabilidad | Base de datos |
+|---|---|---|---|---|
+| api-gateway | 8091 | LoadBalancer | Entrada externa — valida JWT, gestiona CORS, enruta al BFF | — |
+| BFF | 8090 | ClusterIP | Orquestador — agrega y rutea al ms correspondiente | — |
+| ms-auth | 8080 | ClusterIP | Autenticación, emisión y validación de JWT RSA | NeonDB (PostgreSQL) |
+| ms-user | 8081 | ClusterIP | CRUD de usuarios (pacientes, médicos, administrativos) | NeonDB (PostgreSQL) |
+| ms-appointment | 8082 | ClusterIP | Gestión de citas médicas | NeonDB (PostgreSQL) |
+| ms-waitlist | 8083 | ClusterIP | Lista de espera con estrategias de prioridad | NeonDB (PostgreSQL) |
 
 ---
 
@@ -253,6 +257,7 @@ Los valores reutilizables (roles, tipos de documento, etiquetas, clases CSS) est
 
 ```
 hospital-system/
+├── api-gateway/        # API Gateway (Spring Cloud Gateway — entrada externa)
 ├── ms-auth/            # Microservicio de autenticación
 ├── ms-user/            # Microservicio de usuarios
 ├── ms-appointment/     # Microservicio de citas
@@ -291,17 +296,24 @@ hospital-system/
 
 El script compila todos los microservicios, construye las imágenes Docker y las despliega en Kubernetes.
 
+**Construir e iniciar el api-gateway por separado** (primera vez o después de cambios):
+
+```bash
+cd backend/api-gateway
+./gradlew bootJar
+docker build -t api-gateway:latest .
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
 Verificar que todos los pods estén corriendo:
 
 ```bash
 kubectl get pods -n hospital
 ```
 
-Exponer el BFF (puerto 8090):
-
-```bash
-kubectl port-forward svc/bff-service 8090:8090 -n hospital
-```
+El api-gateway queda expuesto en `http://localhost:8091` — es el único punto de entrada para el frontend y para pruebas manuales. El BFF ya no es accesible desde fuera del cluster.
 
 ### 2. Frontend
 
@@ -365,6 +377,7 @@ kubectl apply -f ms-user/k8s/
 kubectl apply -f ms-appointment/k8s/
 kubectl apply -f ms-waitlist/k8s/
 kubectl apply -f bff/k8s/
+kubectl apply -f api-gateway/k8s/
 
 # Verificar pods
 kubectl get pods -n hospital
@@ -422,6 +435,13 @@ Swagger UI disponible en `http://localhost:<puerto>/swagger-ui.html`
 | `MS_APPOINTMENTS_URL` | URL de ms-appointment |
 | `MS_WAITLIST_URL` | URL de ms-waitlist |
 | `FRONTEND_URL` | URL del frontend (para CORS) |
+
+### api-gateway
+| Variable | Descripción |
+|---|---|
+| `MS_AUTH_URL` | URL de ms-auth (para descargar JWKS y validar JWT) |
+| `BFF_URL` | URL del BFF (destino de todas las rutas) |
+| `FRONTEND_URL` | URL del frontend (para CORS centralizado) |
 
 ---
 
