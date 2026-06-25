@@ -2,6 +2,8 @@ package com.hospital.msuser;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -22,7 +24,7 @@ class MsUserApplicationTests {
      * Mockea el JwtDecoder para evitar que Spring intente descargar
      * el JWK Set desde ms-auth durante el arranque del contexto de test.
      */
-    @MockBean
+    @MockitoBean
     JwtDecoder jwtDecoder;
 
     @Test

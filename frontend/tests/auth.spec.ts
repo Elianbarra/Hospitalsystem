@@ -90,6 +90,10 @@ test.describe("Autenticación y control de roles", () => {
       })
     );
 
+    // Paso 1: elegir tipo de usuario
+    await page.getByRole("button", { name: /soy paciente/i }).click();
+
+    // Paso 2: rellenar y enviar
     await page.fill('input[type="email"]', "paciente@hospital.cl");
     await page.fill('input[type="password"]', "Password123!");
     await page.click('button[type="submit"]');
@@ -108,6 +112,10 @@ test.describe("Autenticación y control de roles", () => {
       })
     );
 
+    // Paso 1: elegir tipo de usuario
+    await page.getByRole("button", { name: /soy funcionario/i }).click();
+
+    // Paso 2: rellenar y enviar
     await page.fill('input[type="email"]', "doctor@hospital.cl");
     await page.fill('input[type="password"]', "Password123!");
     await page.click('button[type="submit"]');
@@ -126,12 +134,16 @@ test.describe("Autenticación y control de roles", () => {
       })
     );
 
+    // Paso 1: elegir tipo de usuario
+    await page.getByRole("button", { name: /soy paciente/i }).click();
+
+    // Paso 2: rellenar y enviar
     await page.fill('input[type="email"]', "incorrecto@hospital.cl");
     await page.fill('input[type="password"]', "clavemalal");
     await page.click('button[type="submit"]');
 
     await expect(page).toHaveURL("/");
-    await expect(page.getByText("Credenciales incorrectas")).toBeVisible();
+    await expect(page.getByText(/credenciales inválidas/i)).toBeVisible();
   });
 
   // 4. Sin sesión activa se rechaza el acceso al dashboard
