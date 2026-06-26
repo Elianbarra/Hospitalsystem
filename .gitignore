@@ -10,11 +10,17 @@ Ms-Auth/k8s/ms-auth-secrets.yaml
 **/k8s/*-secrets.yaml
 **/k8s/secret.yaml
 
-# Gradle
+# Gradle / compilados
 .gradle/
 build/
 **/build/
+bin/
+**/bin/
 !gradle/wrapper/gradle-wrapper.jar
+
+# Tests frontend
+frontend/playwright-report/
+frontend/test-results/
 
 # IntelliJ / IDE
 .idea/

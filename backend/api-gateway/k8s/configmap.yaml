@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: hospital
+  labels:
+    app: api-gateway
+data:
+  SERVER_PORT: "8091"
+  # ms-auth para descargar JWKS y validar JWT
+  MS_AUTH_URL: "http://ms-auth-service:8080"
+  # BFF recibe todos los requests enrutados por el gateway
+  BFF_URL: "http://bff-service:8090"
+  # Frontend — para CORS
+  FRONTEND_URL: "http://localhost:3001"
