@@ -16,13 +16,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-/**
- * Orquesta las llamadas al microservicio ms-waitlist.
- * <p>
- * TODO: ms-waitlist aún no está implementado.
- *       Conectar cuando el microservicio esté disponible en MS_WAITLIST_URL.
- * </p>
- */
+
 @Service
 public class WaitlistService {
 

@@ -16,14 +16,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-/**
- * Orquesta las llamadas al microservicio ms-appointment.
- * <p>
- * TODO: ms-appointment aún no está implementado.
- *       Conectar cuando el microservicio esté disponible en MS_APPOINTMENTS_URL.
- *       Los endpoints del ms-appointment deben seguir el contrato definido en los modelos.
- * </p>
- */
+
 @Service
 public class AppointmentService {
 
