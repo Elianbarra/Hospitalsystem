@@ -43,6 +43,12 @@ spring:
 ms-user:
   base-url: ${MS_USER_URL}
 
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${APP_ENV:local}
+  release: ${APP_RELEASE:ms-appointment@local}
+  send-default-pii: false
+
 logging:
   level:
     com.hospital.msappointment: DEBUG

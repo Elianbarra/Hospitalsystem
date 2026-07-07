@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MsAuthApplication<ms-auth>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.hospital.msauth.MsAuthApplication",
+            "projectName": "ms-auth",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsAppointmentApplication<ms-appointment>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend/ms-appointment",
+            "mainClass": "com.hospital.msappointment.MsAppointmentApplication",
+            "projectName": "ms-appointment",
+            "args": "",
+            "envFile": "${workspaceFolder}/backend/ms-appointment/.env"
+        }
+    ]
+}

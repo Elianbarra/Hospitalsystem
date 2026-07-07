@@ -65,6 +65,22 @@ spec:
                 secretKeyRef:
                   name: ms-appointment-db-secret
                   key: POSTGRES_PASSWORD
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: ms-appointment-app-secret
+                  key: SENTRY_DSN
+
+          # ── Downward API — identifica el pod en GlitchTip ─────────────────
+          # Sentry las recoge como tags: pod=ms-appointment-7f9d4-xk2pq, node=worker-1
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
 
           # ── Recursos ──────────────────────────────────────────────────────
           resources:
