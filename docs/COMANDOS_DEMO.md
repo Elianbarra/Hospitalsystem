@@ -50,16 +50,23 @@ npx playwright show-report
 
 ## 4. TESTS BACKEND
 
-```bash
-# Ms-User
-cd ~/Documents/Hospitalsystem/Ms-User && ./gradlew test
+# ms-auth
+cd backend/ms-auth && ./gradlew test
 
-# Ms-Appointment
-cd ~/Documents/Hospitalsystem/Ms-appointment && ./gradlew test
+# ms-user
+cd backend/ms-user && ./gradlew test
 
-# Ms-Waitlist
-cd ~/Documents/Hospitalsystem/Ms-Waitlist && ./gradlew test
-```
+# ms-appointment
+cd backend/ms-appointment && ./gradlew test
+
+# ms-waitlist
+cd backend/ms-waitlist && ./gradlew test
+
+# bff
+cd backend/bff && ./gradlew test
+
+# api-gateway
+cd backend/api-gateway && ./gradlew test
 
 ---
 

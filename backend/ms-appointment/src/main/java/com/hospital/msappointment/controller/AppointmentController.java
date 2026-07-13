@@ -93,4 +93,10 @@ public class AppointmentController {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.noContent().build();
     }
+
+    // TODO: remove — only for verifying GlitchTip integration
+    @GetMapping("/test-sentry")
+    public ResponseEntity<Void> testSentry() {
+        throw new RuntimeException("GlitchTip test error from ms-appointment");
+    }
 }

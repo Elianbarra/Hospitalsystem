@@ -23,6 +23,7 @@ Microservicio desarrollado con **Spring Boot 3.5.3** encargado de gestionar las 
 | spring-dotenv | 4.0.0 | Carga automática del `.env` en local |
 | eclipse-temurin | 25-jre | Imagen base JRE para Docker/K8s |
 | Kubernetes | 1.32+ | Orquestación de contenedores |
+| Sentry SDK (GlitchTip) | 7.14.0 | Monitoreo de errores en producción |
 
 ---
 
@@ -239,3 +240,75 @@ El servicio queda accesible dentro del cluster en `http://ms-appointment-service
 - **Migraciones:** Flyway 11.x — scripts en `src/main/resources/db/migration/`
 - **Tabla principal:** `appointments`
 - **`ddl-auto`:** `none` — Hibernate no toca el esquema, Flyway es el único responsable
+
+---
+
+## Observabilidad — GlitchTip
+
+### Contexto y motivación
+
+MS-APPOINTMENT es el servicio más crítico del sistema: coordina citas entre pacientes y médicos, detecta conflictos de horario y se comunica con MS-USER. Un error silencioso aquí (race condition, inconsistencia de datos, fallo en Feign) puede dejar a un paciente sin cita sin que nadie lo note.
+
+Se integró **GlitchTip** (open-source compatible con la API de Sentry) como sistema de monitoreo de errores. El SDK captura excepciones en tiempo real, las enriquece con contexto (entorno, release, pod) y las envía al dashboard de GlitchTip donde se agrupan, priorizan y rastrean.
+
+### Qué se reporta y qué no
+
+La estrategia es reportar solo lo que requiere atención del equipo, evitando ruido de errores esperados:
+
+| Excepción | Acción | Razón |
+|---|---|---|
+| `AppointmentNotFoundException` | No se reporta (404) | Error esperado — el cliente pidió un ID inexistente |
+| `MethodArgumentNotValidException` | No se reporta (400) | Error del cliente — input inválido, no es un bug |
+| `AppointmentConflictException` | WARNING + tag `scheduling_conflict` | Puede indicar race condition o bug en el frontend |
+| `UserNotFoundException` | ERROR + tags `user_not_found`, `microservice.origin: ms-user` | Inconsistencia entre ms-appointment y ms-user — requiere investigación |
+| `AccessDeniedException` | WARNING + tag `access_denied` | Posible intento de acceso no autorizado |
+| `Exception` (cualquier otra) | ERROR + tag `unhandled` | Bug real no previsto — siempre debe investigarse |
+
+### Enriquecimiento de eventos en Kubernetes
+
+Cuando el servicio corre con múltiples réplicas, cada evento capturado incluye automáticamente los tags `pod` y `node`, inyectados via la **Downward API** de K8s:
+
+```yaml
+# k8s/deployment.yaml
+- name: POD_NAME
+  valueFrom:
+    fieldRef:
+      fieldPath: metadata.name
+- name: NODE_NAME
+  valueFrom:
+    fieldRef:
+      fieldPath: spec.nodeName
+```
+
+Esto permite en GlitchTip filtrar por pod específico y determinar si un error afecta a todas las réplicas o a un nodo concreto, lo cual es crítico para diagnosticar problemas de estado o de infraestructura.
+
+### Configuración
+
+**Local (`.env`):**
+```env
+SENTRY_DSN=https://<key>@app.glitchtip.com/<project-id>
+APP_ENV=local
+```
+
+**Kubernetes (`k8s/secret.yaml` + `k8s/configmap.yaml`):**
+```yaml
+# secret.yaml — ms-appointment-app-secret
+SENTRY_DSN: "https://<key>@app.glitchtip.com/<project-id>"
+
+# configmap.yaml
+APP_ENV:     "production"
+APP_RELEASE: "ms-appointment@<version>"   # sobreescribir con el tag de imagen en CI/CD
+```
+
+El `APP_RELEASE` debe configurarse en el pipeline de CI/CD con el tag de imagen o SHA del commit para que GlitchTip pueda detectar en qué deploy apareció cada error por primera vez.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---|---|
+| `build.gradle.kts` | Dependencia `sentry-spring-boot-starter-jakarta:7.14.0` |
+| `src/main/resources/application.yml` | Bloque `sentry:` con DSN, environment y release dinámicos |
+| `exception/GlobalExceptionHandler.java` | `Sentry.captureException()` con tags por tipo de error + pod/node |
+| `k8s/secret.yaml` | `SENTRY_DSN` en `ms-appointment-app-secret` |
+| `k8s/configmap.yaml` | `APP_ENV` y `APP_RELEASE` |
+| `k8s/deployment.yaml` | Referencia al secret + Downward API para `POD_NAME` y `NODE_NAME` |

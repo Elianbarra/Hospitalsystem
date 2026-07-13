@@ -50,6 +50,9 @@ dependencies {
     // Carga de .env en local
     implementation("me.paulschwarz:spring-dotenv:4.0.0")
 
+    // GlitchTip / Sentry — monitoreo de errores (compatible con API Sentry)
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.14.0")
+
     // Dev tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
